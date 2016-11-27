@@ -40,8 +40,15 @@ public:
     virtual bool isSecure() const         { return false; }
     virtual bool isFixedSize() const      { return true; }
     virtual bool isVisible() const;
+<<<<<<< HEAD
     virtual void setPerFrameData(const sp<const DisplayDevice>& hw,
             HWComposer::HWCLayerInterface& layer);
+=======
+#ifndef USE_HWC2
+    virtual void setPerFrameData(const sp<const DisplayDevice>& hw,
+            HWComposer::HWCLayerInterface& layer);
+#endif
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
 };
 
 // ---------------------------------------------------------------------------

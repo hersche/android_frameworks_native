@@ -39,8 +39,11 @@ public:
         READ_ONLY   = 0x00000001,
 #ifdef USE_MEMORY_HEAP_ION
         USE_ION_FD  = 0x00008000
+<<<<<<< HEAD
 #else
         USE_ION_FD  = 0x00000008
+=======
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
 #endif
     };
 

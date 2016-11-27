@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Not a Contribution
+ *
+ *
  * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +32,8 @@
 
 #include <binder/IMemory.h>
 #include <binder/IServiceManager.h>
+
+#include <system/graphics.h>
 
 #include <ui/DisplayInfo.h>
 
@@ -164,8 +170,19 @@ public:
     status_t setOrientation(int orientation);
     status_t setCrop(const sp<SurfaceComposerClient>& client, const sp<IBinder>& id,
             const Rect& crop);
+    status_t setFinalCrop(const sp<SurfaceComposerClient>& client,
+            const sp<IBinder>& id, const Rect& crop);
     status_t setLayerStack(const sp<SurfaceComposerClient>& client,
             const sp<IBinder>& id, uint32_t layerStack);
+    status_t deferTransactionUntil(const sp<SurfaceComposerClient>& client,
+            const sp<IBinder>& id, const sp<IBinder>& handle,
+            uint64_t frameNumber);
+    status_t setOverrideScalingMode(const sp<SurfaceComposerClient>& client,
+            const sp<IBinder>& id, int32_t overrideScalingMode);
+    status_t setGeometryAppliesWithResize(const sp<SurfaceComposerClient>& client,
+            const sp<IBinder>& id);
+    status_t setColor(const sp<SurfaceComposerClient>& client,
+            const sp<IBinder>& id, uint32_t color);
 
     void setDisplaySurface(const sp<IBinder>& token,
             const sp<IGraphicBufferProducer>& bufferProducer);
@@ -362,9 +379,9 @@ status_t Composer::setFlags(const sp<SurfaceComposerClient>& client,
     layer_state_t* s = getLayerStateLocked(client, id);
     if (!s)
         return BAD_INDEX;
-    if (mask & layer_state_t::eLayerOpaque ||
-            mask & layer_state_t::eLayerHidden ||
-            mask & layer_state_t::eLayerSecure) {
+    if ((mask & layer_state_t::eLayerOpaque) ||
+            (mask & layer_state_t::eLayerHidden) ||
+            (mask & layer_state_t::eLayerSecure)) {
         s->what |= layer_state_t::eFlagsChanged;
     }
     s->flags &= ~mask;
@@ -432,6 +449,82 @@ status_t Composer::setCrop(const sp<SurfaceComposerClient>& client,
         return BAD_INDEX;
     s->what |= layer_state_t::eCropChanged;
     s->crop = crop;
+    return NO_ERROR;
+}
+
+status_t Composer::setFinalCrop(const sp<SurfaceComposerClient>& client,
+        const sp<IBinder>& id, const Rect& crop) {
+    Mutex::Autolock _l(mLock);
+    layer_state_t* s = getLayerStateLocked(client, id);
+    if (!s) {
+        return BAD_INDEX;
+    }
+    s->what |= layer_state_t::eFinalCropChanged;
+    s->finalCrop = crop;
+    return NO_ERROR;
+}
+
+status_t Composer::deferTransactionUntil(
+        const sp<SurfaceComposerClient>& client, const sp<IBinder>& id,
+        const sp<IBinder>& handle, uint64_t frameNumber) {
+    Mutex::Autolock lock(mLock);
+    layer_state_t* s = getLayerStateLocked(client, id);
+    if (!s) {
+        return BAD_INDEX;
+    }
+    s->what |= layer_state_t::eDeferTransaction;
+    s->handle = handle;
+    s->frameNumber = frameNumber;
+    return NO_ERROR;
+}
+
+status_t Composer::setOverrideScalingMode(
+        const sp<SurfaceComposerClient>& client,
+        const sp<IBinder>& id, int32_t overrideScalingMode) {
+    Mutex::Autolock lock(mLock);
+    layer_state_t* s = getLayerStateLocked(client, id);
+    if (!s) {
+        return BAD_INDEX;
+    }
+
+    switch (overrideScalingMode) {
+        case NATIVE_WINDOW_SCALING_MODE_FREEZE:
+        case NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW:
+        case NATIVE_WINDOW_SCALING_MODE_SCALE_CROP:
+        case NATIVE_WINDOW_SCALING_MODE_NO_SCALE_CROP:
+        case -1:
+            break;
+        default:
+            ALOGE("unknown scaling mode: %d",
+                    overrideScalingMode);
+            return BAD_VALUE;
+    }
+
+    s->what |= layer_state_t::eOverrideScalingModeChanged;
+    s->overrideScalingMode = overrideScalingMode;
+    return NO_ERROR;
+}
+
+status_t Composer::setGeometryAppliesWithResize(
+        const sp<SurfaceComposerClient>& client,
+        const sp<IBinder>& id) {
+    Mutex::Autolock lock(mLock);
+    layer_state_t* s = getLayerStateLocked(client, id);
+    if (!s) {
+        return BAD_INDEX;
+    }
+    s->what |= layer_state_t::eGeometryAppliesWithResize;
+    return NO_ERROR;
+}
+
+status_t Composer::setColor(const sp<SurfaceComposerClient>& client,
+        const sp<IBinder>& id, uint32_t color) {
+    Mutex::Autolock _l(mLock);
+    layer_state_t* s = getLayerStateLocked(client, id);
+    if (!s)
+        return BAD_INDEX;
+    s->what |= layer_state_t::eColorChanged;
+    s->color = color;
     return NO_ERROR;
 }
 
@@ -590,6 +683,14 @@ status_t SurfaceComposerClient::getLayerFrameStats(const sp<IBinder>& token,
     return mClient->getLayerFrameStats(token, outStats);
 }
 
+status_t SurfaceComposerClient::getTransformToDisplayInverse(const sp<IBinder>& token,
+        bool* outTransformToDisplayInverse) const {
+    if (mStatus != NO_ERROR) {
+        return mStatus;
+    }
+    return mClient->getTransformToDisplayInverse(token, outTransformToDisplayInverse);
+}
+
 inline Composer& SurfaceComposerClient::getComposer() {
     return mComposer;
 }
@@ -612,6 +713,11 @@ void SurfaceComposerClient::setAnimationTransaction() {
 
 status_t SurfaceComposerClient::setCrop(const sp<IBinder>& id, const Rect& crop) {
     return getComposer().setCrop(this, id, crop);
+}
+
+status_t SurfaceComposerClient::setFinalCrop(const sp<IBinder>& id,
+        const Rect& crop) {
+    return getComposer().setFinalCrop(this, id, crop);
 }
 
 status_t SurfaceComposerClient::setPosition(const sp<IBinder>& id, float x, float y) {
@@ -677,6 +783,26 @@ status_t SurfaceComposerClient::setMatrix(const sp<IBinder>& id, float dsdx, flo
     return getComposer().setMatrix(this, id, dsdx, dtdx, dsdy, dtdy);
 }
 
+status_t SurfaceComposerClient::deferTransactionUntil(const sp<IBinder>& id,
+        const sp<IBinder>& handle, uint64_t frameNumber) {
+    return getComposer().deferTransactionUntil(this, id, handle, frameNumber);
+}
+
+status_t SurfaceComposerClient::setOverrideScalingMode(
+        const sp<IBinder>& id, int32_t overrideScalingMode) {
+    return getComposer().setOverrideScalingMode(
+            this, id, overrideScalingMode);
+}
+
+status_t SurfaceComposerClient::setGeometryAppliesWithResize(
+        const sp<IBinder>& id) {
+    return getComposer().setGeometryAppliesWithResize(this, id);
+}
+
+status_t SurfaceComposerClient::setColor(const sp<IBinder>& id, uint32_t color) {
+    return getComposer().setColor(this, id, color);
+}
+
 // ----------------------------------------------------------------------------
 
 void SurfaceComposerClient::setDisplaySurface(const sp<IBinder>& token,
@@ -736,6 +862,20 @@ status_t SurfaceComposerClient::setActiveConfig(const sp<IBinder>& display, int 
     return ComposerService::getComposerService()->setActiveConfig(display, id);
 }
 
+status_t SurfaceComposerClient::getDisplayColorModes(const sp<IBinder>& display,
+        Vector<android_color_mode_t>* outColorModes) {
+    return ComposerService::getComposerService()->getDisplayColorModes(display, outColorModes);
+}
+
+android_color_mode_t SurfaceComposerClient::getActiveColorMode(const sp<IBinder>& display) {
+    return ComposerService::getComposerService()->getActiveColorMode(display);
+}
+
+status_t SurfaceComposerClient::setActiveColorMode(const sp<IBinder>& display,
+        android_color_mode_t colorMode) {
+    return ComposerService::getComposerService()->setActiveColorMode(display, colorMode);
+}
+
 void SurfaceComposerClient::setDisplayPowerMode(const sp<IBinder>& token,
         int mode) {
     ComposerService::getComposerService()->setPowerMode(token, mode);
@@ -747,6 +887,12 @@ status_t SurfaceComposerClient::clearAnimationFrameStats() {
 
 status_t SurfaceComposerClient::getAnimationFrameStats(FrameStats* outStats) {
     return ComposerService::getComposerService()->getAnimationFrameStats(outStats);
+}
+
+status_t SurfaceComposerClient::getHdrCapabilities(const sp<IBinder>& display,
+        HdrCapabilities* outCapabilities) {
+    return ComposerService::getComposerService()->getHdrCapabilities(display,
+            outCapabilities);
 }
 
 // ----------------------------------------------------------------------------

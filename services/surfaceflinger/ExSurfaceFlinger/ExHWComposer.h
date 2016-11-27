@@ -43,10 +43,13 @@ public:
 
     virtual ~ExHWComposer();
 
+<<<<<<< HEAD
 #ifdef QTI_BSP
     uint32_t getS3DFlag(int disp) const;
 #endif
 
+=======
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
 protected:
     bool mVDSEnabled;
     inline bool isVDSEnabled() const { return mVDSEnabled; };

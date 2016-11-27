@@ -321,6 +321,7 @@ void BpMemoryHeap::assertReallyMapped() const
         if (flags & USE_ION_FD) {
             ion_client_num = ion_client_create();
             ALOGE_IF(ion_client_num < 0, "BpMemoryHeap : ion client creation error");
+<<<<<<< HEAD
         }
 #endif
 
@@ -331,10 +332,21 @@ void BpMemoryHeap::assertReallyMapped() const
         int access = PROT_READ;
         if (!(flags & READ_ONLY)) {
             access |= PROT_WRITE;
+=======
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
         }
-
+#endif
         Mutex::Autolock _l(mLock);
         if (mHeapId == -1) {
+            int fd = dup( parcel_fd );
+            ALOGE_IF(fd==-1, "cannot dup fd=%d, size=%zd, err=%d (%s)",
+                    parcel_fd, size, err, strerror(errno));
+
+            int access = PROT_READ;
+            if (!(flags & READ_ONLY)) {
+                access |= PROT_WRITE;
+            }
+
             mRealHeap = true;
 
 #ifdef USE_MEMORY_HEAP_ION
@@ -345,7 +357,11 @@ void BpMemoryHeap::assertReallyMapped() const
                 mBase = ion_map(fd, size, offset);
             } else
 #endif
+<<<<<<< HEAD
                 mBase = mmap(0, size, access, MAP_SHARED, fd, offset);
+=======
+            mBase = mmap(0, size, access, MAP_SHARED, fd, offset);
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
             if (mBase == MAP_FAILED) {
                 ALOGE("cannot map BpMemoryHeap (binder=%p), size=%zd, fd=%d (%s)",
                         IInterface::asBinder(this).get(), size, fd, strerror(errno));

@@ -46,7 +46,12 @@ bool InputWindowInfo::isTrustedOverlay() const {
             || layoutParamsType == TYPE_MAGNIFICATION_OVERLAY
             || layoutParamsType == TYPE_STATUS_BAR
             || layoutParamsType == TYPE_NAVIGATION_BAR
+<<<<<<< HEAD
             || layoutParamsType == TYPE_SECURE_SYSTEM_OVERLAY;
+=======
+            || layoutParamsType == TYPE_SECURE_SYSTEM_OVERLAY
+            || layoutParamsType == TYPE_DOCK_DIVIDER;
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
 }
 
 bool InputWindowInfo::supportsSplitTouch() const {

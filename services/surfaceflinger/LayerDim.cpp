@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Not a Contribution
+ *
+ *
  * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// #define LOG_NDEBUG 0
+#undef LOG_TAG
+#define LOG_TAG "LayerDim"
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -47,7 +55,11 @@ void LayerDim::onDraw(const sp<const DisplayDevice>& hw,
         Mesh mesh(Mesh::TRIANGLE_FAN, 4, 2);
         computeGeometry(hw, mesh, useIdentityTransform);
         RenderEngine& engine(mFlinger->getRenderEngine());
-        engine.setupDimLayerBlending(s.alpha);
+        if (!s.color) {
+          engine.setupDimLayerBlending(s.alpha);
+        } else {
+          engine.setupDimLayerBlendingWithColor(s.color, s.alpha);
+        }
         engine.drawMesh(mesh);
         engine.disableBlending();
     }
@@ -58,15 +70,29 @@ bool LayerDim::isVisible() const {
     return !(s.flags & layer_state_t::eLayerHidden) && s.alpha;
 }
 
+<<<<<<< HEAD
+=======
+#ifndef USE_HWC2
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
 void LayerDim::setPerFrameData(const sp<const DisplayDevice>& hw,
         HWComposer::HWCLayerInterface& layer) {
   HWComposer& hwc = mFlinger->getHwComposer();
 
   Layer::setPerFrameData(hw, layer);
   if (hwc.hasDimComposition()) {
+<<<<<<< HEAD
     layer.setDim();
   }
 }
+=======
+    // SF Client can set RGBA color on Dim layer. Solid Black is default.
+    uint32_t color = getDrawingState().color;
+    uint32_t rgba_color = !color ? 0x000000FF : color;
+    layer.setDim(rgba_color);
+  }
+}
+#endif
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
 
 // ---------------------------------------------------------------------------
 

@@ -17,6 +17,7 @@ include $(CLEAR_VARS)
 
 LOCAL_CLANG := true
 LOCAL_CPPFLAGS := -std=c++1y -Weverything -Werror
+# LOCAL_SANITIZE := integer
 
 # The static constructors and destructors in this library have not been noted to
 # introduce significant overheads
@@ -35,15 +36,18 @@ LOCAL_CPPFLAGS += -Wno-padded
 
 LOCAL_SRC_FILES := \
 	Fence.cpp \
-	FramebufferNativeWindow.cpp \
 	FrameStats.cpp \
+	Gralloc1.cpp \
+	Gralloc1On0Adapter.cpp \
 	GraphicBuffer.cpp \
 	GraphicBufferAllocator.cpp \
 	GraphicBufferMapper.cpp \
+	HdrCapabilities.cpp \
 	PixelFormat.cpp \
 	Rect.cpp \
 	Region.cpp \
-	UiConfig.cpp
+	UiConfig.cpp \
+	MediatekHacks.cpp
 
 ifeq ($(BOARD_HAS_MTK_HARDWARE),true)
 LOCAL_SRC_FILES += \
@@ -56,6 +60,7 @@ LOCAL_CPPFLAGS := -std=c++1y -Weverything
 
 endif
 LOCAL_SHARED_LIBRARIES := \
+	libbinder \
 	libcutils \
 	libhardware \
 	libsync \

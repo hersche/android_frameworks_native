@@ -63,11 +63,11 @@ public:
     // log messages.
     void setName(const String8& name);
 
-    // dump writes the current state to a string. Child classes should add
+    // dumpState writes the current state to a string. Child classes should add
     // their state to the dump by overriding the dumpLocked method, which is
     // called by these methods after locking the mutex.
-    void dump(String8& result) const;
-    void dump(String8& result, const char* prefix) const;
+    void dumpState(String8& result) const;
+    void dumpState(String8& result, const char* prefix) const;
 
     // setFrameAvailableListener sets the listener object that will be notified
     // when a new frame becomes available.
@@ -84,6 +84,13 @@ public:
 
     // See IGraphicBufferConsumer::setDefaultBufferDataSpace
     status_t setDefaultBufferDataSpace(android_dataspace defaultDataSpace);
+
+    // See IGraphicBufferConsumer::getOccupancyHistory
+    status_t getOccupancyHistory(bool forceFlush,
+            std::vector<OccupancyTracker::Segment>* outHistory);
+
+    // See IGraphicBufferConsumer::discardFreeBuffers
+    status_t discardFreeBuffers();
 
 private:
     ConsumerBase(const ConsumerBase&);

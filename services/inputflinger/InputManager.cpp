@@ -20,6 +20,7 @@
 
 #include "InputManager.h"
 
+#include <cutils/iosched_policy.h>
 #include <cutils/log.h>
 #include <cutils/iosched_policy.h>
 

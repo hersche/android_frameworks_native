@@ -52,6 +52,14 @@ struct layer_state_t {
         eFlagsChanged               = 0x00000040,
         eLayerStackChanged          = 0x00000080,
         eCropChanged                = 0x00000100,
+<<<<<<< HEAD
+=======
+        eDeferTransaction           = 0x00000200,
+        eFinalCropChanged           = 0x00000400,
+        eOverrideScalingModeChanged = 0x00000800,
+        eGeometryAppliesWithResize  = 0x00001000,
+        eColorChanged               = 0x00002000,
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
         eBlurChanged                = 0x00400000,
         eBlurMaskSurfaceChanged     = 0x00800000,
         eBlurMaskSamplingChanged    = 0x01000000,
@@ -62,11 +70,16 @@ struct layer_state_t {
         :   what(0),
             x(0), y(0), z(0), w(0), h(0), layerStack(0), blur(0),
             blurMaskSampling(0), blurMaskAlphaThreshold(0), alpha(0), flags(0), mask(0),
+<<<<<<< HEAD
             reserved(0)
+=======
+            reserved(0), crop(Rect::INVALID_RECT),
+            finalCrop(Rect::INVALID_RECT), frameNumber(0),
+            overrideScalingMode(-1), color(0)
+>>>>>>> d7b29fa3f8b2d97680b8eb94912d0d25cf20ebb0
     {
         matrix.dsdx = matrix.dtdy = 1.0f;
         matrix.dsdy = matrix.dtdx = 0.0f;
-        crop.makeInvalid();
     }
 
     status_t    write(Parcel& output) const;
@@ -96,8 +109,13 @@ struct layer_state_t {
             uint8_t         reserved;
             matrix22_t      matrix;
             Rect            crop;
+            Rect            finalCrop;
+            sp<IBinder>     handle;
+            uint64_t        frameNumber;
+            int32_t         overrideScalingMode;
             // non POD must be last. see write/read
             Region          transparentRegion;
+            uint32_t        color;
 };
 
 struct ComposerState {
@@ -124,6 +142,8 @@ struct DisplayState {
         eDisplayProjectionChanged   = 0x04,
         eDisplaySizeChanged         = 0x08
     };
+
+    DisplayState();
 
     uint32_t what;
     sp<IBinder> token;
