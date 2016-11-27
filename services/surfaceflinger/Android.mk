@@ -86,10 +86,6 @@ ifeq ($(TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK),true)
     LOCAL_CFLAGS += -DRUNNING_WITHOUT_SYNC_FRAMEWORK
 endif
 
-ifeq ($(TARGET_HAS_HH_VSYNC_ISSUE),true)
-    LOCAL_CFLAGS += -DHH_VSYNC_ISSUE
-endif
-
 # See build/target/board/generic/BoardConfig.mk for a description of this setting.
 ifneq ($(VSYNC_EVENT_PHASE_OFFSET_NS),)
     LOCAL_CFLAGS += -DVSYNC_EVENT_PHASE_OFFSET_NS=$(VSYNC_EVENT_PHASE_OFFSET_NS)
@@ -114,10 +110,6 @@ ifneq ($(MAX_VIRTUAL_DISPLAY_DIMENSION),)
     LOCAL_CFLAGS += -DMAX_VIRTUAL_DISPLAY_DIMENSION=$(MAX_VIRTUAL_DISPLAY_DIMENSION)
 else
     LOCAL_CFLAGS += -DMAX_VIRTUAL_DISPLAY_DIMENSION=0
-endif
-
-ifeq ($(BOARD_USE_BGRA_8888),true)
-    LOCAL_CFLAGS += -DUSE_BGRA_8888
 endif
 
 LOCAL_CFLAGS += -fvisibility=hidden -Werror=format
@@ -157,24 +149,6 @@ ifeq ($(TARGET_USES_QCOM_BSP), true)
     ExSurfaceFlinger/ExVirtualDisplaySurface.cpp \
     ExSurfaceFlinger/ExHWComposer.cpp
   endif
-endif
-
-ifeq ($(BOARD_USES_HWC_SERVICES), true)
-    LOCAL_CFLAGS += -DUSES_HWC_SERVICES
-    LOCAL_SHARED_LIBRARIES += libExynosHWCService
-    LOCAL_C_INCLUDES += \
-        $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include \
-        $(TOP)/hardware/samsung_slsi-$(TARGET_SLSI_VARIANT)/$(TARGET_BOARD_PLATFORM)/libhwcService \
-        $(TOP)/hardware/samsung_slsi-$(TARGET_SLSI_VARIANT)/$(TARGET_BOARD_PLATFORM)/include \
-        $(TOP)/hardware/samsung_slsi-$(TARGET_SLSI_VARIANT)/$(TARGET_SOC)/include \
-        $(TOP)/hardware/samsung_slsi-$(TARGET_SLSI_VARIANT)/$(TARGET_SOC)/libhwcmodule \
-        $(TOP)/hardware/samsung_slsi-$(TARGET_SLSI_VARIANT)/exynos/libhwc \
-        $(TOP)/hardware/samsung_slsi-$(TARGET_SLSI_VARIANT)/exynos/include \
-        $(TOP)/hardware/samsung_slsi-$(TARGET_SLSI_VARIANT)/exynos/libexynosutils \
-        $(TOP)/system/core/libsync/include
-
-LOCAL_ADDITIONAL_DEPENDENCIES := \
-        $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
 endif
 
 LOCAL_MODULE := libsurfaceflinger
