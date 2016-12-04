@@ -73,6 +73,14 @@ private:
     std::unique_ptr<Gralloc1::Device> mDevice;
 };
 
+#ifdef MTK_HARDWARE
+extern "C" {
+
+    status_t _ZN7android19GraphicBufferMapper4lockEPK13native_handleiRKNS_4RectEPPv(
+            buffer_handle_t handle, int usage, const Rect& bounds, void** vaddr);
+
+}
+#endif
 // ---------------------------------------------------------------------------
 
 }; // namespace android
