@@ -57,6 +57,9 @@ public:
     // release surface data from java
     void        clear();
 
+    // disconnect any api that's connected
+    void        disconnect();
+
     status_t    setLayerStack(uint32_t layerStack);
     status_t    setLayer(uint32_t layer);
     status_t    setPosition(float x, float y);
@@ -68,11 +71,29 @@ public:
     status_t    setAlpha(float alpha=1.0f);
     status_t    setMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
     status_t    setCrop(const Rect& crop);
+    status_t    setFinalCrop(const Rect& crop);
+    status_t    setColor(uint32_t color);
+
+    // If the size changes in this transaction, all geometry updates specified
+    // in this transaction will not complete until a buffer of the new size
+    // arrives. As some elements normally apply immediately, this enables
+    // freezing the total geometry of a surface until a resize is completed.
+    status_t    setGeometryAppliesWithResize();
+
+    // Defers applying any changes made in this transaction until the Layer
+    // identified by handle reaches the given frameNumber
+    status_t deferTransactionUntil(sp<IBinder> handle, uint64_t frameNumber);
+
+    // Set an override scaling mode as documented in <system/window.h>
+    // the override scaling mode will take precedence over any client
+    // specified scaling mode. -1 will clear the override scaling mode.
+    status_t setOverrideScalingMode(int32_t overrideScalingMode);
 
     static status_t writeSurfaceToParcel(
             const sp<SurfaceControl>& control, Parcel* parcel);
 
     sp<Surface> getSurface() const;
+    sp<IBinder> getHandle() const;
 
     status_t clearLayerFrameStats() const;
     status_t getLayerFrameStats(FrameStats* outStats) const;
@@ -82,6 +103,11 @@ public:
     status_t    setBlurMaskSampling(uint32_t blurMaskSampling);
     status_t    setBlurMaskAlphaThreshold(float alpha);
 
+<<<<<<< HEAD
+=======
+    status_t getTransformToDisplayInverse(bool* outTransformToDisplayInverse) const;
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 private:
     // can't be copied
     SurfaceControl& operator = (SurfaceControl& rhs);

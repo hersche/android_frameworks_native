@@ -36,6 +36,8 @@ LOCAL_CPPFLAGS += -Wno-gnu-zero-variadic-macro-arguments
 # Don't warn about struct padding
 LOCAL_CPPFLAGS += -Wno-padded
 
+LOCAL_CPPFLAGS += -DDEBUG_ONLY_CODE=$(if $(filter userdebug eng,$(TARGET_BUILD_VARIANT)),1,0)
+
 LOCAL_SRC_FILES := \
 	IGraphicBufferConsumer.cpp \
 	IConsumerListener.cpp \
@@ -62,6 +64,7 @@ LOCAL_SRC_FILES := \
 	ISurfaceComposer.cpp \
 	ISurfaceComposerClient.cpp \
 	LayerState.cpp \
+	OccupancyTracker.cpp \
 	Sensor.cpp \
 	SensorEventQueue.cpp \
 	SensorManager.cpp \
@@ -95,6 +98,13 @@ ifeq ($(TARGET_NO_SENSOR_PERMISSION_CHECK),true)
 LOCAL_CPPFLAGS += -DNO_SENSOR_PERMISSION_CHECK
 endif
 
+<<<<<<< HEAD
+=======
+ifeq ($(TARGET_FORCE_SCREENSHOT_CPU_PATH),true)
+LOCAL_CPPFLAGS += -DFORCE_SCREENSHOT_CPU_PATH
+endif
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 include $(BUILD_SHARED_LIBRARY)
 
 ifeq (,$(ONE_SHOT_MAKEFILE))

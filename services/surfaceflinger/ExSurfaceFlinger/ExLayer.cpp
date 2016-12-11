@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+=======
+/* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -72,6 +76,7 @@ static Rect getAspectRatio(const sp<const DisplayDevice>& hw,
 
 ExLayer::ExLayer(SurfaceFlinger* flinger, const sp<Client>& client,
                  const String8& name, uint32_t w, uint32_t h, uint32_t flags)
+<<<<<<< HEAD
 #ifdef QTI_BSP
     : Layer(flinger, client, name, w, h, flags),
       mMeshLeftTop(Mesh::TRIANGLE_FAN, 4, 2, 2),
@@ -79,11 +84,19 @@ ExLayer::ExLayer(SurfaceFlinger* flinger, const sp<Client>& client,
 #else
     : Layer(flinger, client, name, w, h, flags) {
 #endif
+=======
+    : Layer(flinger, client, name, w, h, flags),
+      mMeshLeftTop(Mesh::TRIANGLE_FAN, 4, 2, 2),
+      mMeshRightBottom(Mesh::TRIANGLE_FAN, 4, 2, 2) {
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     char property[PROPERTY_VALUE_MAX] = {0};
 
     mDebugLogs = false;
     mIsGPUAllowedForProtected = false;
+<<<<<<< HEAD
     mIsHDMIPrimary = false;
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     if((property_get("persist.debug.qdframework.logs", property, NULL) > 0) &&
        (!strncmp(property, "1", PROPERTY_VALUE_MAX ) ||
         (!strncasecmp(property,"true", PROPERTY_VALUE_MAX )))) {
@@ -96,12 +109,15 @@ ExLayer::ExLayer(SurfaceFlinger* flinger, const sp<Client>& client,
            (atoi(property) == 1)) {
         mIsGPUAllowedForProtected = true;
     }
+<<<<<<< HEAD
 
     if ((property_get("persist.sys.is_hdmi_primary", property, NULL) > 0) &&
            (atoi(property) == 1)) {
         mIsHDMIPrimary = true;
     }
 
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 }
 
 ExLayer::~ExLayer() {
@@ -218,6 +234,7 @@ bool ExLayer::canAllowGPUForProtected() const {
     }
 }
 
+<<<<<<< HEAD
 void ExLayer::drawWithOpenGL(const sp<const DisplayDevice>& hw,
         const Region& /* clip */, bool useIdentityTransform) const {
     const State& s(getDrawingState());
@@ -303,6 +320,50 @@ void ExLayer::drawWithOpenGL(const sp<const DisplayDevice>& hw,
 #ifdef QTI_BSP
 void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
         Mesh& meshLeftTop, Mesh &meshRightBottom, uint32_t s3d_fmt) const
+=======
+#if (defined QTI_BSP) && (defined QTI_S3D)
+uint32_t ExLayer::getS3dFormat(const sp<const DisplayDevice>& hw) const {
+    uint32_t s3d_fmt = HWC_S3DMODE_NONE;
+    const sp<GraphicBuffer>& activeBuffer(mActiveBuffer);
+
+    if (activeBuffer != 0) {
+        ANativeWindowBuffer* buffer = activeBuffer->getNativeBuffer();
+        if (buffer) {
+            private_handle_t* hnd = static_cast<private_handle_t*>
+                    (const_cast<native_handle_t*>(buffer->handle));
+            if (hnd != NULL) {
+                struct S3DGpuComp_t s3dComp;
+                getMetaData(hnd, GET_S3D_COMP, &s3dComp);
+                if (s3dComp.displayId == hw->getHwcDisplayId()) {
+                    s3d_fmt = s3dComp.s3dMode;
+                }
+            }
+        }
+    }
+    return s3d_fmt;
+}
+
+void ExLayer::clearS3dFormat(const sp<const DisplayDevice>& hw) const {
+    const sp<GraphicBuffer>& activeBuffer(mActiveBuffer);
+    if (activeBuffer != 0) {
+        ANativeWindowBuffer* buffer = activeBuffer->getNativeBuffer();
+        if (buffer) {
+            private_handle_t* hnd = static_cast<private_handle_t*>
+                (const_cast<native_handle_t*>(buffer->handle));
+            if (hnd != NULL) {
+                struct S3DGpuComp_t s3dComp;
+                getMetaData(hnd, GET_S3D_COMP, &s3dComp);
+                if (s3dComp.displayId == hw->getHwcDisplayId()) {
+                    clearMetaData(hnd, SET_S3D_COMP);
+                }
+            }
+        }
+    }
+}
+
+void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
+        Mesh& meshLeftTop, Mesh& meshRightBottom, uint32_t s3d_fmt) const
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 {
     Mesh::VertexArray<vec2> position(mesh.getPositionArray<vec2>());
     Mesh::VertexArray<vec2> positionLeftTop(meshLeftTop.getPositionArray<vec2>());
@@ -313,10 +374,13 @@ void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
 
     Rect scissor = hw->getBounds();
 
+<<<<<<< HEAD
     if(s3d_fmt == HWC_S3DMODE_NONE) {
         return;
     }
 
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     uint32_t count = mesh.getVertexCount();
     while(count--) {
         positionLeftTop[count] = positionRightBottom[count] = position[count];
@@ -384,6 +448,50 @@ void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
             break;
     }
 }
+<<<<<<< HEAD
+=======
+
+void ExLayer::handleOpenGLDraw(const sp<const DisplayDevice>& hw,
+    Mesh& mesh) const
+{
+    const State& s(getDrawingState());
+    RenderEngine& engine(mFlinger->getRenderEngine());
+    engine.setupLayerBlending(mPremultipliedAlpha, isOpaque(s), s.alpha);
+    uint32_t s3d_fmt = getS3dFormat(hw);
+    if (s3d_fmt == HWC_S3DMODE_NONE) {
+        engine.drawMesh(mesh);
+    } else {
+        computeGeometryS3D(hw, mesh, mMeshLeftTop, mMeshRightBottom, s3d_fmt);
+        // in non-primary case scissor might be not equal to hw bounds
+        engine.setScissor(0, 0, hw->getWidth(), hw->getHeight());
+        engine.drawMesh(mMeshLeftTop);
+        engine.drawMesh(mMeshRightBottom);
+        clearS3dFormat(hw);
+    }
+    engine.disableBlending();
+}
+#else
+uint32_t ExLayer::getS3dFormat(const sp<const DisplayDevice>&) const {
+    return 0;
+}
+
+void ExLayer::clearS3dFormat(const sp<const DisplayDevice>&) const {
+}
+
+void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>&, Mesh&,
+        Mesh&, Mesh&, uint32_t) const {
+}
+
+void ExLayer::handleOpenGLDraw(const sp<const DisplayDevice>& /* hw */,
+            Mesh& mesh) const {
+    const State& s(getDrawingState());
+    RenderEngine& engine(mFlinger->getRenderEngine());
+
+    engine.setupLayerBlending(mPremultipliedAlpha, isOpaque(s), s.alpha);
+    engine.drawMesh(mesh);
+    engine.disableBlending();
+}
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 #endif
 
 }; // namespace android

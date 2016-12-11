@@ -228,7 +228,10 @@ bool LayerBlur::captureScreen(const sp<const DisplayDevice>& hw, FBO& fbo, Textu
             texture.getTextureName(), 0);
 
     mFlinger->getRenderEngine().clearWithColor(0.0f, 0.0f, 0.0f, 1.0f);
+<<<<<<< HEAD
     rotation = (Transform::orientation_flags)(rotation ^ hw->getPanelMountFlip());
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     mFlinger->renderScreenImplLocked(
                 hw,
                 Rect(0,0,width,height),
@@ -302,8 +305,13 @@ void LayerBlur::doDrawFinal(const sp<const DisplayDevice>& hw,
     RenderEngine& engine(mFlinger->getRenderEngine());
     const Layer::State& s(getDrawingState());
 
+<<<<<<< HEAD
     Transform trToDraw(useIdentityTransform ? hw->getTransform() : hw->getTransform() * s.transform);
     Transform trToMapTexture(hw->getTransform() * s.transform);
+=======
+    Transform trToDraw(useIdentityTransform ? hw->getTransform() : hw->getTransform() * s.active.transform);
+    Transform trToMapTexture(hw->getTransform() * s.active.transform);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 
     Rect frameToDraw(trToDraw.transform(Rect(s.active.w, s.active.h)));
     Rect frameToMapTexture(trToMapTexture.transform(Rect(s.active.w, s.active.h)));

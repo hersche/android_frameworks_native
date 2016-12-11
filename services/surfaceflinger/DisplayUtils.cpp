@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* Copyright (c) 2015 - 2016, The Linux Foundation. All rights reserved.
+=======
+/* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -29,6 +33,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
+<<<<<<< HEAD
+=======
+#include <unistd.h>
+
+#include <cutils/properties.h>
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
@@ -39,11 +49,16 @@
 #include "RenderEngine/RenderEngine.h"
 #include "DisplayHardware/FramebufferSurface.h"
 #include "DisplayUtils.h"
+<<<<<<< HEAD
 #ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 #include <ExSurfaceFlinger/ExSurfaceFlinger.h>
 #include <ExSurfaceFlinger/ExLayer.h>
 #include <ExSurfaceFlinger/ExHWComposer.h>
 #include <ExSurfaceFlinger/ExVirtualDisplaySurface.h>
+<<<<<<< HEAD
 #include <gralloc_priv.h>
 #ifdef SDM_TARGET
 #include <qd_utils.h>
@@ -52,6 +67,11 @@
 #endif
 #include <dlfcn.h>
 #include <cutils/properties.h>
+=======
+#include <dlfcn.h>
+#include <gralloc_priv.h>
+#endif
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 
 namespace android {
 
@@ -59,8 +79,14 @@ DisplayUtils* DisplayUtils::sDisplayUtils = NULL;
 bool DisplayUtils::sUseExtendedImpls = false;
 
 DisplayUtils::DisplayUtils() {
+<<<<<<< HEAD
 #ifdef QTI_BSP
     sUseExtendedImpls = true;
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+    sUseExtendedImpls = true;
+    hasWbNode();
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 #endif
 }
 
@@ -72,7 +98,11 @@ DisplayUtils* DisplayUtils::getInstance() {
 }
 
 SurfaceFlinger* DisplayUtils::getSFInstance() {
+<<<<<<< HEAD
 #ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     if(sUseExtendedImpls) {
         return new ExSurfaceFlinger();
     }
@@ -83,7 +113,11 @@ SurfaceFlinger* DisplayUtils::getSFInstance() {
 Layer* DisplayUtils::getLayerInstance(SurfaceFlinger* flinger,
                             const sp<Client>& client, const String8& name,
                             uint32_t w, uint32_t h, uint32_t flags) {
+<<<<<<< HEAD
 #ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     if(sUseExtendedImpls) {
         return new ExLayer(flinger, client, name, w, h, flags);
     }
@@ -94,12 +128,25 @@ Layer* DisplayUtils::getLayerInstance(SurfaceFlinger* flinger,
 HWComposer* DisplayUtils::getHWCInstance(
                         const sp<SurfaceFlinger>& flinger,
                         HWComposer::EventHandler& handler) {
+<<<<<<< HEAD
 #ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     if(sUseExtendedImpls) {
         return new ExHWComposer(flinger, handler);
     }
 #endif
+<<<<<<< HEAD
     return new HWComposer(flinger,handler);
+=======
+#if defined(USE_HWC2)
+    (void)handler;
+    return new HWComposer(flinger);
+#else
+    return new HWComposer(flinger, handler);
+#endif
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 }
 
 void DisplayUtils::initVDSInstance(HWComposer* hwc, int32_t hwcDisplayId,
@@ -108,7 +155,11 @@ void DisplayUtils::initVDSInstance(HWComposer* hwc, int32_t hwcDisplayId,
         sp<IGraphicBufferConsumer> bqConsumer, String8 currentStateDisplayName,
         bool currentStateIsSecure, int currentStateType)
 {
+<<<<<<< HEAD
 #ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     if(sUseExtendedImpls) {
         if(hwc->isVDSEnabled()) {
             VirtualDisplaySurface* vds = new ExVirtualDisplaySurface(*hwc, hwcDisplayId,
@@ -131,7 +182,11 @@ void DisplayUtils::initVDSInstance(HWComposer* hwc, int32_t hwcDisplayId,
                 currentStateSurface, bqProducer, bqConsumer, currentStateDisplayName);
         dispSurface = vds;
         producer = vds;
+<<<<<<< HEAD
 #ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     }
 #endif
 }
@@ -164,9 +219,16 @@ bool DisplayUtils::createV4L2BasedVirtualDisplay(HWComposer* hwc, int32_t &hwcDi
         surface = eglCreateWindowSurface(display, config, window, NULL);
         eglQuerySurface(display, surface, EGL_WIDTH, &w);
         eglQuerySurface(display, surface, EGL_HEIGHT, &h);
+<<<<<<< HEAD
         if(hwc->setVirtualDisplayProperties(hwcDisplayId, w, h, format) != NO_ERROR)
             return false;
 
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+        if(hwc->setVirtualDisplayProperties(hwcDisplayId, w, h, format) != NO_ERROR)
+            return false;
+#endif
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
         dispSurface = new FramebufferSurface(*hwc, currentStateType, bqConsumer);
         producer = bqProducer;
         return true;
@@ -177,6 +239,7 @@ bool DisplayUtils::createV4L2BasedVirtualDisplay(HWComposer* hwc, int32_t &hwcDi
 bool DisplayUtils::canAllocateHwcDisplayIdForVDS(int usage) {
     // on AOSP builds with QTI_BSP disabled, we should allocate hwc display id for virtual display
     int flag_mask = 0xffffffff;
+<<<<<<< HEAD
 
 #ifdef QTI_BSP
 #ifdef FORCE_HWC_COPY_FOR_VIRTUAL_DISPLAYS
@@ -207,6 +270,55 @@ bool DisplayUtils::canAllocateHwcDisplayIdForVDS(int usage) {
 #endif
 
     return (usage & flag_mask);
+=======
+    char value[PROPERTY_VALUE_MAX];
+    property_get("debug.vds.allow_hwc", value, "0");
+    int allowHwcForVDS = atoi(value);
+
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+    // Do not allow hardware acceleration
+    flag_mask = GRALLOC_USAGE_PRIVATE_WFD;
+#endif
+
+    return ((mHasWbNode) && (!allowHwcForVDS) && (usage & flag_mask));
+}
+
+int DisplayUtils::getNumFbNodes() {
+    int i = 0;
+    while (hasFbNode(i)) i++;
+    return i;
+}
+
+bool DisplayUtils::hasFbNode(int index) {
+    char filename[kMaxStringLength];
+    snprintf(filename, kMaxStringLength, "/sys/class/graphics/fb%d", index);
+    if (access(filename, F_OK) < 0) {
+        return false;
+    }
+    return true;
+}
+
+bool DisplayUtils::hasWbNode() {
+    int fbNum = getNumFbNodes();
+    char msmFbType [kMaxStringLength];
+    char fbType [kMaxStringLength];
+    FILE *displayPanelFP = NULL;
+    mHasWbNode = false;
+
+    for (int i = 0; i < fbNum; i++) {
+        snprintf (msmFbType,MAX_FRAME_BUFFER_NAME_SIZE, "/sys/class/graphics/fb%d/msm_fb_type", i);
+        displayPanelFP = fopen(msmFbType, "r");
+        if(displayPanelFP) {
+            fread(fbType, sizeof(char), MAX_FRAME_BUFFER_NAME_SIZE, displayPanelFP);
+            fclose(displayPanelFP);
+            if(strncmp(fbType, "writeback panel", strlen("writeback panel")) == 0) {
+                mHasWbNode = true;
+                break;
+            }
+        }
+    }
+    return mHasWbNode;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 }
 
 }; // namespace android

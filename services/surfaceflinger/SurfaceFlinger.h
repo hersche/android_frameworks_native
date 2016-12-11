@@ -42,14 +42,18 @@
 
 #include <gui/ISurfaceComposer.h>
 #include <gui/ISurfaceComposerClient.h>
+#include <gui/OccupancyTracker.h>
 
 #include <hardware/hwcomposer_defs.h>
+
+#include <system/graphics.h>
 
 #include <private/gui/LayerState.h>
 
 #include "Barrier.h"
 #include "DisplayDevice.h"
 #include "DispSync.h"
+#include "FenceTracker.h"
 #include "FrameTracker.h"
 #include "MessageQueue.h"
 
@@ -58,6 +62,12 @@
 
 #include "FrameRateHelper.h"
 
+<<<<<<< HEAD
+=======
+#include <map>
+#include <string>
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 namespace android {
 
 // ---------------------------------------------------------------------------
@@ -126,7 +136,11 @@ public:
 
     // enable/disable h/w composer event
     // TODO: this should be made accessible only to EventThread
+#ifdef USE_HWC2
+    void setVsyncEnabled(int disp, int enabled);
+#else
     void eventControl(int disp, int event, int enabled);
+#endif
 
     // called on the main thread by MessageQueue when an internal message
     // is received
@@ -146,9 +160,12 @@ private:
     friend class DisplayEventConnection;
     friend class Layer;
     friend class LayerDim;
+<<<<<<< HEAD
 #ifdef QTI_BSP
     friend class ExLayer;
 #endif
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     friend class MonitoredProducer;
     friend class LayerBlur;
 
@@ -174,7 +191,7 @@ private:
 
     struct DisplayDeviceState {
         DisplayDeviceState();
-        DisplayDeviceState(DisplayDevice::DisplayType type);
+        DisplayDeviceState(DisplayDevice::DisplayType type, bool isSecure);
         bool isValid() const { return type >= 0; }
         bool isMainDisplay() const { return type == DisplayDevice::DISPLAY_PRIMARY; }
         bool isVirtualDisplay() const { return type >= DisplayDevice::DISPLAY_VIRTUAL; }
@@ -226,10 +243,16 @@ private:
     virtual status_t getDisplayConfigs(const sp<IBinder>& display,
             Vector<DisplayInfo>* configs);
     virtual int getActiveConfig(const sp<IBinder>& display);
+    virtual status_t getDisplayColorModes(const sp<IBinder>& display,
+            Vector<android_color_mode_t>* configs);
+    virtual android_color_mode_t getActiveColorMode(const sp<IBinder>& display);
+    virtual status_t setActiveColorMode(const sp<IBinder>& display, android_color_mode_t colorMode);
     virtual void setPowerMode(const sp<IBinder>& display, int mode);
     virtual status_t setActiveConfig(const sp<IBinder>& display, int id);
     virtual status_t clearAnimationFrameStats();
     virtual status_t getAnimationFrameStats(FrameStats* outStats) const;
+    virtual status_t getHdrCapabilities(const sp<IBinder>& display,
+            HdrCapabilities* outCapabilities) const;
 
     /* ------------------------------------------------------------------------
      * DeathRecipient interface
@@ -257,6 +280,10 @@ private:
                      bool& /*bIgnoreLayers*/,
                      int& /*indexLOI*/) { }
 
+<<<<<<< HEAD
+=======
+#ifndef USE_HWC2
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     virtual bool updateLayerVisibleNonTransparentRegion(
                      const int& dpy, const sp<Layer>& layer,
                      bool& bIgnoreLayers, int& indexLOI,
@@ -284,6 +311,12 @@ private:
         const HWComposer::LayerListIterator &end,
         const sp<const DisplayDevice>& hw,
         const Region& region);
+<<<<<<< HEAD
+=======
+#endif
+    virtual bool isS3DLayerPresent(const sp<const DisplayDevice>& /*hw*/)
+        { return false; };
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     /* ------------------------------------------------------------------------
      * Message handling
      */
@@ -298,6 +331,9 @@ private:
     void setActiveConfigInternal(const sp<DisplayDevice>& hw, int mode);
     // called on the main thread in response to setPowerMode()
     void setPowerModeInternal(const sp<DisplayDevice>& hw, int mode);
+
+    // Called on the main thread in response to setActiveColorMode()
+    void setActiveColorModeInternal(const sp<DisplayDevice>& hw, android_color_mode_t colorMode);
 
     // Returns whether the transaction actually modified any state
     bool handleMessageTransaction();
@@ -358,7 +394,7 @@ private:
     status_t onLayerDestroyed(const wp<Layer>& layer);
 
     // remove a layer from SurfaceFlinger immediately
-    status_t removeLayer(const sp<Layer>& layer);
+    status_t removeLayer(const wp<Layer>& layer);
 
     // add a layer to SurfaceFlinger
     status_t addClientLayer(const sp<Client>& client,
@@ -384,7 +420,11 @@ private:
             Rect sourceCrop, uint32_t reqWidth, uint32_t reqHeight,
             uint32_t minLayerZ, uint32_t maxLayerZ,
             bool useIdentityTransform, Transform::orientation_flags rotation,
+<<<<<<< HEAD
             bool useReadPixels);
+=======
+            bool isLocalScreenshot, bool useReadPixels);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 
     /* ------------------------------------------------------------------------
      * EGL
@@ -411,12 +451,23 @@ private:
         return mDisplays.valueFor(dpy);
     }
 
+    int32_t getDisplayType(const sp<IBinder>& display) {
+        if (!display.get()) return NAME_NOT_FOUND;
+        for (int i = 0; i < DisplayDevice::NUM_BUILTIN_DISPLAY_TYPES; ++i) {
+            if (display == mBuiltinDisplays[i]) {
+                return i;
+            }
+        }
+        return NAME_NOT_FOUND;
+    }
+
     // mark a region of a layer stack dirty. this updates the dirty
     // region of all screens presenting this layer stack.
     void invalidateLayerStack(uint32_t layerStack, const Region& dirty);
 
-    // allocate a h/w composer display id
+#ifndef USE_HWC2
     int32_t allocateHwcDisplayId(DisplayDevice::DisplayType type);
+#endif
 
     /* ------------------------------------------------------------------------
      * H/W composer
@@ -433,7 +484,7 @@ private:
             Region& dirtyRegion, Region& opaqueRegion);
 
     void preComposition();
-    void postComposition();
+    void postComposition(nsecs_t refreshStartTime);
     void rebuildLayerStacks();
     void setUpHWComposer();
     void doComposition();
@@ -455,8 +506,11 @@ private:
      * VSync
      */
      void enableHardwareVsync();
-     void disableHardwareVsync(bool makeUnavailable);
      void resyncToHardwareVsync(bool makeAvailable);
+     void disableHardwareVsync(bool makeUnavailable);
+public:
+     void resyncWithRateLimit();
+private:
 
     /* ------------------------------------------------------------------------
      * Debugging & dumpsys
@@ -475,6 +529,16 @@ private:
 
     void dumpStaticScreenStats(String8& result) const;
     virtual void dumpDrawCycle(bool /* prePrepare */ ) { }
+<<<<<<< HEAD
+=======
+
+    void recordBufferingStats(const char* layerName,
+            std::vector<OccupancyTracker::Segment>&& history);
+    void dumpBufferingStats(String8& result) const;
+
+    bool getFrameTimestamps(const Layer& layer, uint64_t frameNumber,
+            FrameTimestamps* outTimestamps);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 
     /* ------------------------------------------------------------------------
      * Attributes
@@ -501,7 +565,6 @@ private:
     RenderEngine* mRenderEngine;
     nsecs_t mBootTime;
     bool mGpuToCpuSupported;
-    bool mDropMissedFrames;
     sp<EventThread> mEventThread;
     sp<EventThread> mSFEventThread;
     sp<EventControlThread> mEventControlThread;
@@ -513,8 +576,17 @@ private:
     // don't need synchronization
     State mDrawingState;
     bool mVisibleRegionsDirty;
+#ifndef USE_HWC2
     bool mHwWorkListDirty;
+#else
+    bool mGeometryInvalid;
+#endif
     bool mAnimCompositionPending;
+#ifdef USE_HWC2
+    std::vector<sp<Layer>> mLayersWithQueuedFrames;
+    sp<Fence> mPreviousPresentFence = Fence::NO_FENCE;
+    bool mHadClientComposition = false;
+#endif
 
     // this may only be written from the main thread with mStateLock held
     // it may be read from other threads with mStateLock held
@@ -531,6 +603,11 @@ private:
     nsecs_t mLastTransactionTime;
     bool mBootFinished;
     bool mForceFullDamage;
+    FenceTracker mFenceTracker;
+#ifdef USE_HWC2
+    bool mPropagateBackpressure = true;
+#endif
+    bool mUseHwcVirtualDisplays = true;
 
     // these are thread safe
     mutable MessageQueue mEventQueue;
@@ -551,8 +628,11 @@ private:
      */
 
     Daltonizer mDaltonizer;
+#ifndef USE_HWC2
     bool mDaltonize;
+#endif
 
+    mat4 mPreviousColorMatrix;
     mat4 mColorMatrix;
     bool mHasColorMatrix;
 
@@ -564,7 +644,11 @@ private:
     static const size_t NUM_BUCKETS = 8; // < 1-7, 7+
     nsecs_t mFrameBuckets[NUM_BUCKETS];
     nsecs_t mTotalTime;
+<<<<<<< HEAD
     nsecs_t mLastSwapTime;
+=======
+    std::atomic<nsecs_t> mLastSwapTime;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 
     FrameRateHelper mFrameRateHelper;
 
@@ -576,6 +660,31 @@ private:
      */
     uint32_t mActiveFrameSequence;
 
+<<<<<<< HEAD
+=======
+    // Double- vs. triple-buffering stats
+    struct BufferingStats {
+        BufferingStats()
+          : numSegments(0),
+            totalTime(0),
+            twoBufferTime(0),
+            doubleBufferedTime(0),
+            tripleBufferedTime(0) {}
+
+        size_t numSegments;
+        nsecs_t totalTime;
+
+        // "Two buffer" means that a third buffer was never used, whereas
+        // "double-buffered" means that on average the segment only used two
+        // buffers (though it may have used a third for some part of the
+        // segment)
+        nsecs_t twoBufferTime;
+        nsecs_t doubleBufferedTime;
+        nsecs_t tripleBufferedTime;
+    };
+    mutable Mutex mBufferingStatsMutex;
+    std::unordered_map<std::string, BufferingStats> mBufferingStats;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 };
 
 }; // namespace android

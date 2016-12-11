@@ -31,8 +31,11 @@
 #include "ExHWComposer.h"
 #ifdef QTI_BSP
 #include <hardware/display_defs.h>
+<<<<<<< HEAD
 #include <gralloc_priv.h>
 #include <qdMetaData.h>
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 #endif
 
 namespace android {
@@ -76,6 +79,7 @@ bool ExHWComposer::isCompositionTypeBlit(const int32_t compType) const {
     return false;
 }
 
+<<<<<<< HEAD
 #if defined(QTI_BSP) && defined(SDM_TARGET)
 uint32_t ExHWComposer::getS3DFlag(int disp) const {
     if (disp < 0) {
@@ -104,4 +108,6 @@ uint32_t ExHWComposer::getS3DFlag(int disp) const {
 }
 #endif
 
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 }; // namespace android

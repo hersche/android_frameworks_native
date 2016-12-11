@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Not a Contribution
+ *
+ *
  * Copyright 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -122,20 +126,33 @@ void GLES11RenderEngine::setViewportAndProjection(
     glMatrixMode(GL_MODELVIEW);
 }
 
+#ifdef USE_HWC2
+void GLES11RenderEngine::setupLayerBlending(bool premultipliedAlpha,
+        bool opaque, float alpha) {
+#else
 void GLES11RenderEngine::setupLayerBlending(
     bool premultipliedAlpha, bool opaque, int alpha) {
+#endif
     GLenum combineRGB;
     GLenum combineAlpha;
     GLenum src0Alpha;
     GLfloat envColor[4];
 
+#ifdef USE_HWC2
+    if (CC_UNLIKELY(alpha < 1.0f)) {
+#else
     if (CC_UNLIKELY(alpha < 0xFF)) {
+#endif
         // Cv = premultiplied ? Cs*alpha : Cs
         // Av = !opaque       ? As*alpha : As
         combineRGB   = premultipliedAlpha ? GL_MODULATE : GL_REPLACE;
         combineAlpha = !opaque            ? GL_MODULATE : GL_REPLACE;
         src0Alpha    = GL_CONSTANT;
+#ifdef USE_HWC2
+        envColor[0]  = alpha;
+#else
         envColor[0]  = alpha * (1.0f / 255.0f);
+#endif
     } else {
         // Cv = Cs
         // Av = opaque ? 1.0 : As
@@ -167,7 +184,11 @@ void GLES11RenderEngine::setupLayerBlending(
         glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColor);
     }
 
+#ifdef USE_HWC2
+    if (alpha < 1.0f || !opaque) {
+#else
     if (alpha < 0xFF || !opaque) {
+#endif
         glEnable(GL_BLEND);
         glBlendFunc(premultipliedAlpha ? GL_ONE : GL_SRC_ALPHA,
                     GL_ONE_MINUS_SRC_ALPHA);
@@ -176,16 +197,58 @@ void GLES11RenderEngine::setupLayerBlending(
     }
 }
 
+#ifdef USE_HWC2
+void GLES11RenderEngine::setupDimLayerBlending(float alpha) {
+#else
 void GLES11RenderEngine::setupDimLayerBlending(int alpha) {
+#endif
     glDisable(GL_TEXTURE_EXTERNAL_OES);
     glDisable(GL_TEXTURE_2D);
+#ifdef USE_HWC2
+    if (alpha == 1.0f) {
+#else
     if (alpha == 0xFF) {
+#endif
         glDisable(GL_BLEND);
     } else {
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     }
+#ifdef USE_HWC2
+    glColor4f(0, 0, 0, alpha);
+#else
     glColor4f(0, 0, 0, alpha/255.0f);
+#endif
+}
+
+#ifdef USE_HWC2
+void GLES11RenderEngine::setupDimLayerBlendingWithColor(uint32_t color, float alpha) {
+#else
+void GLES11RenderEngine::setupDimLayerBlendingWithColor(uint32_t color, int alpha) {
+#endif
+    // SF Client sets the color on Dim Layer in RGBA format
+    float r = float((color & 0xFF000000) >> 24);
+    float g = float((color & 0x00FF0000) >> 16);
+    float b = float((color & 0x0000FF00) >> 8);
+    float a = float(color & 0x000000FF);
+
+    glDisable(GL_TEXTURE_EXTERNAL_OES);
+    glDisable(GL_TEXTURE_2D);
+#ifdef USE_HWC2
+    if (alpha == 1.0f) {
+#else
+    if (alpha == 0xFF) {
+#endif
+        glDisable(GL_BLEND);
+    } else {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    }
+#ifdef USE_HWC2
+    glColor4f(r, g, b, (a / 255.0f) * alpha);
+#else
+    glColor4f(r, g, b, (a / 255.0f) * (alpha / 255.0f));
+#endif
 }
 
 void GLES11RenderEngine::setupLayerTexturing(const Texture& texture) {

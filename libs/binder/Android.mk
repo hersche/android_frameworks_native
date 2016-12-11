@@ -23,19 +23,23 @@ sources := \
     IAppOpsService.cpp \
     IBatteryStats.cpp \
     IInterface.cpp \
+    IMediaResourceMonitor.cpp \
     IMemory.cpp \
     IPCThreadState.cpp \
     IPermissionController.cpp \
     IProcessInfoService.cpp \
-    ProcessInfoService.cpp \
+    IResultReceiver.cpp \
     IServiceManager.cpp \
-    MemoryDealer.cpp \
     MemoryBase.cpp \
+    MemoryDealer.cpp \
     MemoryHeapBase.cpp \
     Parcel.cpp \
     PermissionCache.cpp \
+    PersistableBundle.cpp \
+    ProcessInfoService.cpp \
     ProcessState.cpp \
     Static.cpp \
+    Status.cpp \
     TextOutput.cpp \
 
 ifeq ($(BOARD_NEEDS_MEMORYHEAPION),true)
@@ -50,6 +54,7 @@ include $(CLEAR_VARS)
 ifeq ($(BOARD_NEEDS_MEMORYHEAPION),true)
 LOCAL_SHARED_LIBRARIES += libion_exynos
 LOCAL_CFLAGS += -DUSE_MEMORY_HEAP_ION
+<<<<<<< HEAD
 
 ifeq ($(TARGET_SLSI_VARIANT),cm)
 SLSI_DIR := samsung_slsi-cm
@@ -59,10 +64,19 @@ SLSI_DIR := samsung_slsi
 PLATFORM_DIR := $(TARGET_BOARD_PLATFORM)-$(TARGET_SLSI_VARIANT)
 endif
 LOCAL_C_INCLUDES += hardware/$(SLSI_DIR)/$(PLATFORM_DIR)/include
+=======
+LOCAL_C_INCLUDES += hardware/samsung_slsi-cm/$(TARGET_BOARD_PLATFORM)/include
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 endif
 
 LOCAL_MODULE := libbinder
 LOCAL_SHARED_LIBRARIES += liblog libcutils libutils
+<<<<<<< HEAD
+=======
+
+LOCAL_CLANG := true
+LOCAL_SANITIZE := integer
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 LOCAL_SRC_FILES := $(sources)
 ifneq ($(TARGET_USES_64_BIT_BINDER),true)
 ifneq ($(TARGET_IS_64_BIT),true)
@@ -77,6 +91,7 @@ include $(CLEAR_VARS)
 ifeq ($(BOARD_NEEDS_MEMORYHEAPION),true)
 LOCAL_SHARED_LIBRARIES += libion_exynos
 LOCAL_CFLAGS += -DUSE_MEMORY_HEAP_ION
+<<<<<<< HEAD
 
 ifeq ($(TARGET_SLSI_VARIANT),cm)
 SLSI_DIR := samsung_slsi-cm
@@ -86,6 +101,9 @@ SLSI_DIR := samsung_slsi
 PLATFORM_DIR := $(TARGET_BOARD_PLATFORM)-$(TARGET_SLSI_VARIANT)
 endif
 LOCAL_C_INCLUDES += hardware/$(SLSI_DIR)/$(PLATFORM_DIR)/include
+=======
+LOCAL_C_INCLUDES += hardware/samsung_slsi-cm/$(TARGET_BOARD_PLATFORM)/include
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 endif
 
 LOCAL_MODULE := libbinder

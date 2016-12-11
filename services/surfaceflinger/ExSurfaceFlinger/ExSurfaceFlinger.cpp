@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+=======
+/* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,6 +37,10 @@
 #ifdef QTI_BSP
 #include <hardware/display_defs.h>
 #endif
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
 namespace android {
@@ -208,10 +216,15 @@ void ExSurfaceFlinger::isfreezeSurfacePresent(bool& freezeSurfacePresent,
     /* Get the layers in the current drawing state */
     const LayerVector& layers(mDrawingState.layersSortedByZ);
     const size_t layerCount = layers.size();
+<<<<<<< HEAD
     /* Look for ScreenShotSurface in external layer list, only when
      * disable external rotation animation feature is enabled
      */
     if(mDisableExtAnimation && (id != HWC_DISPLAY_PRIMARY)) {
+=======
+    /* Look for ScreenShotSurface in external layer list */
+    if(id != HWC_DISPLAY_PRIMARY) {
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
         for (size_t i = 0 ; i < layerCount ; ++i) {
             static int screenShotLen = strlen("ScreenshotSurface");
             const sp<Layer>& layer(layers[i]);
@@ -235,6 +248,11 @@ void ExSurfaceFlinger::setOrientationEventControl(bool& freezeSurfacePresent,
                              const int32_t& id) {
     HWComposer& hwc(getHwComposer());
     HWComposer::LayerListIterator cur = hwc.begin(id);
+<<<<<<< HEAD
+=======
+    if(!cur)
+        return;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 
     if(freezeSurfacePresent) {
         /* If freezeSurfacePresent, set ANIMATING flag
@@ -267,6 +285,32 @@ void ExSurfaceFlinger::drawWormHoleIfRequired(HWComposer::LayerListIterator& cur
     }
 }
 
+<<<<<<< HEAD
+=======
+#if (defined QTI_BSP) && (defined QTI_S3D)
+bool ExSurfaceFlinger::isS3DLayerPresent(const sp<const DisplayDevice>& hw) {
+    const Vector< sp<Layer> >& visibleLayersSortedByZ =
+                hw->getVisibleLayersSortedByZ();
+    for (size_t i = 0 ; i < visibleLayersSortedByZ.size() ; i++) {
+        const sp<Layer>& layer(visibleLayersSortedByZ[i]);
+        // LayerDim doesn't have getS3dFormat. This is to avoid RTTI.
+        if(strncmp(layer->getTypeId(), "LayerDim", strlen("LayerDim"))) {
+            const sp<ExLayer>& exLayer =
+                reinterpret_cast<const sp<ExLayer>&>(layer);
+            if (exLayer->getS3dFormat(hw) != HWC_S3DMODE_NONE) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+#else
+bool ExSurfaceFlinger::isS3DLayerPresent(const sp<const DisplayDevice>&) {
+    return false;
+}
+#endif
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
 #ifdef DEBUG_CONT_DUMPSYS
 status_t ExSurfaceFlinger::dump(int fd, const Vector<String16>& args) {
     // Format: adb shell dumpsys SurfaceFlinger --file --no-limit
@@ -335,10 +379,13 @@ void ExSurfaceFlinger::dumpDrawCycle(bool prePrepare) {
 
     gettimeofday(&tv, NULL);
     ptm = localtime(&tv.tv_sec);
+<<<<<<< HEAD
     if (ptm == NULL) {
         return;
     }
 
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     strftime (hms, sizeof (hms), "%H:%M:%S", ptm);
     millis = tv.tv_usec / 1000;
     snprintf(timeStamp, sizeof(timeStamp), "Timestamp: %s.%03ld", hms, millis);

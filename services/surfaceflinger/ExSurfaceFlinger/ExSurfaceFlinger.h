@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+=======
+/* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -68,6 +72,10 @@ protected:
                      const HWComposer::LayerListIterator& /*end*/,
                      const sp<const DisplayDevice>& hw,
                      const Region& region);
+<<<<<<< HEAD
+=======
+    virtual bool isS3DLayerPresent(const sp<const DisplayDevice>& hw);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
     virtual ~ExSurfaceFlinger();
 
     /* Extended Mode
