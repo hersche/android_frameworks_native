@@ -46,8 +46,16 @@ class IGraphicBufferConsumer;
 class DisplaySurface;
 
 /* Factory Classes */
+<<<<<<< HEAD
 #define kMaxStringLength (1024)
 #define MAX_FRAME_BUFFER_NAME_SIZE (80)
+=======
+<<<<<<< HEAD
+=======
+#define kMaxStringLength (1024)
+#define MAX_FRAME_BUFFER_NAME_SIZE (80)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
 class DisplayUtils {
   public:
@@ -68,17 +76,33 @@ class DisplayUtils {
   private:
     static DisplayUtils* sDisplayUtils;
     static bool sUseExtendedImpls;
+<<<<<<< HEAD
     bool mHasWbNode;
+=======
+<<<<<<< HEAD
+=======
+    bool mHasWbNode;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     bool createV4L2BasedVirtualDisplay(HWComposer* hwc, int32_t &hwcDisplayId,
                    sp<DisplaySurface> &dispSurface, sp<IGraphicBufferProducer> &producer,
                    sp<IGraphicBufferProducer> currentStateSurface,
                    sp<IGraphicBufferProducer> bqProducer,
                    sp<IGraphicBufferConsumer> bqConsumer, int currentStateType);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 
     bool hasWbNode();
     bool hasFbNode(int index);
     int getNumFbNodes();
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 };
 
 }; // namespace android

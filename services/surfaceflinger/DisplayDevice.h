@@ -263,10 +263,19 @@ private:
     int mActiveConfig;
     // Panel's mount flip, H, V or 180 (HV)
     uint32_t mPanelMountFlip;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #ifdef USE_HWC2
     // current active color mode
     android_color_mode_t mActiveColorMode;
 #endif
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 };
 
 }; // namespace android

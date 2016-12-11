@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 /* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+=======
+<<<<<<< HEAD
+/* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+=======
+/* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -43,6 +51,28 @@ class ExSurfaceFlinger;
 class ExLayer : public Layer
 {
 public:
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+    enum {
+        /*
+         * HWC S3D_MODE is set by HWC driver to indicate that HWC driver can not support
+         * S3D standalone, need surfaceflinger help to draw layers twice to construct
+         * S3D framebuffer target.
+         */
+        HWC_S3DMODE_NONE = 0x00000000,
+        HWC_S3DMODE_LR = 0x00000001,
+        HWC_S3DMODE_RL = 0x00000002,
+        HWC_S3DMODE_TB = 0x00000003,
+        HWC_S3DMODE_FP = 0x00000004,
+        HWC_S3DMODE_MAX = 0x00000005,
+    };
+#endif
+
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     ExLayer(SurfaceFlinger* flinger, const sp<Client>& client,
             const String8& name, uint32_t w, uint32_t h, uint32_t flags);
     virtual ~ExLayer();
@@ -51,19 +81,58 @@ public:
     virtual bool isIntOnly() const;
     virtual bool isSecureDisplay() const;
     virtual bool isYuvLayer() const;
+<<<<<<< HEAD
     virtual uint32_t getS3dFormat(const sp<const DisplayDevice>& hw) const;
     virtual void clearS3dFormat(const sp<const DisplayDevice>& hw) const;
+=======
+<<<<<<< HEAD
+=======
+    virtual uint32_t getS3dFormat(const sp<const DisplayDevice>& hw) const;
+    virtual void clearS3dFormat(const sp<const DisplayDevice>& hw) const;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     virtual void setPosition(const sp<const DisplayDevice>& hw,
                              HWComposer::HWCLayerInterface& layer, const State& state);
     virtual void setAcquiredFenceIfBlit(int &fenceFd,
                              HWComposer::HWCLayerInterface& layer);
     virtual bool canAllowGPUForProtected() const;
+<<<<<<< HEAD
     virtual void handleOpenGLDraw(const sp<const DisplayDevice>& hw, Mesh& mesh) const;
 
+=======
+<<<<<<< HEAD
+
+#ifdef QTI_BSP
+    virtual void computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
+        Mesh& meshLeftTop, Mesh &meshRightBottom, uint32_t s3d_fmt) const;
+#endif
+=======
+    virtual void handleOpenGLDraw(const sp<const DisplayDevice>& hw, Mesh& mesh) const;
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 protected:
     bool mDebugLogs;
     bool isDebug() { return mDebugLogs; }
     bool mIsGPUAllowedForProtected;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    bool mIsHDMIPrimary;
+
+private:
+#ifdef QTI_BSP
+    // The mesh used to draw the layer in GLES composition mode for s3d left/top
+    mutable Mesh mMeshLeftTop;
+    // The mesh used to draw the layer in GLES composition mode for s3d right/bottom
+    mutable Mesh mMeshRightBottom;
+
+    virtual void drawWithOpenGL(const sp<const DisplayDevice>& hw, const Region& clip,
+            bool useIdentityTransform) const;
+};
+#endif
+=======
+>>>>>>> CyanogenMod-cm-14.1
 
 private:
     // The mesh used to draw the layer in GLES composition for s3d left/top
@@ -74,6 +143,10 @@ private:
     void computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
         Mesh& meshLeftTop, Mesh &meshRightBottom, uint32_t s3d_fmt) const;
 };
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
 }; // namespace android
 

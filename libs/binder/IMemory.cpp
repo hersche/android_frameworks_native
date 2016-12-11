@@ -321,6 +321,22 @@ void BpMemoryHeap::assertReallyMapped() const
         if (flags & USE_ION_FD) {
             ion_client_num = ion_client_create();
             ALOGE_IF(ion_client_num < 0, "BpMemoryHeap : ion client creation error");
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        }
+#endif
+
+        int fd = dup( parcel_fd );
+        ALOGE_IF(fd==-1, "cannot dup fd=%d, size=%zd, err=%d (%s)",
+                parcel_fd, size, err, strerror(errno));
+
+        int access = PROT_READ;
+        if (!(flags & READ_ONLY)) {
+            access |= PROT_WRITE;
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         }
 #endif
         Mutex::Autolock _l(mLock);
@@ -344,7 +360,15 @@ void BpMemoryHeap::assertReallyMapped() const
                 mBase = ion_map(fd, size, offset);
             } else
 #endif
+<<<<<<< HEAD
             mBase = mmap(0, size, access, MAP_SHARED, fd, offset);
+=======
+<<<<<<< HEAD
+                mBase = mmap(0, size, access, MAP_SHARED, fd, offset);
+=======
+            mBase = mmap(0, size, access, MAP_SHARED, fd, offset);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             if (mBase == MAP_FAILED) {
                 ALOGE("cannot map BpMemoryHeap (binder=%p), size=%zd, fd=%d (%s)",
                         IInterface::asBinder(this).get(), size, fd, strerror(errno));

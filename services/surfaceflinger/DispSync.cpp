@@ -71,20 +71,46 @@ public:
             mPeriod(0),
             mPhase(0),
             mReferenceTime(0),
+<<<<<<< HEAD
             mWakeupLatency(0),
             mFrameNumber(0) {}
+=======
+<<<<<<< HEAD
+            mWakeupLatency(0) {
+    }
+=======
+            mWakeupLatency(0),
+            mFrameNumber(0) {}
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     virtual ~DispSyncThread() {}
 
     void updateModel(nsecs_t period, nsecs_t phase, nsecs_t referenceTime) {
+<<<<<<< HEAD
         if (kTraceDetailedInfo) ATRACE_CALL();
+=======
+<<<<<<< HEAD
+=======
+        if (kTraceDetailedInfo) ATRACE_CALL();
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         Mutex::Autolock lock(mMutex);
         mPeriod = period;
         mPhase = phase;
         mReferenceTime = referenceTime;
+<<<<<<< HEAD
         ALOGV("[%s] updateModel: mPeriod = %" PRId64 ", mPhase = %" PRId64
                 " mReferenceTime = %" PRId64, mName, ns2us(mPeriod),
                 ns2us(mPhase), ns2us(mReferenceTime));
+=======
+<<<<<<< HEAD
+=======
+        ALOGV("[%s] updateModel: mPeriod = %" PRId64 ", mPhase = %" PRId64
+                " mReferenceTime = %" PRId64, mName, ns2us(mPeriod),
+                ns2us(mPhase), ns2us(mReferenceTime));
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         mCond.signal();
     }
 
@@ -299,6 +325,13 @@ private:
                     ns2us(baseTime));
         }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        nsecs_t phase = mReferenceTime + mPhase + listener.mPhase;
+        nsecs_t t = (((ref - phase) / mPeriod) + 1) * mPeriod + phase;
+=======
+>>>>>>> CyanogenMod-cm-14.1
         baseTime -= mReferenceTime;
         ALOGV("[%s] Relative baseTime = %" PRId64, mName, ns2us(baseTime));
         nsecs_t phase = mPhase + listener.mPhase;
@@ -317,6 +350,10 @@ private:
             ALOGV("[%s] Correcting negative baseTime", mName);
             baseTime = -mPeriod;
         }
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
         nsecs_t numPeriods = baseTime / mPeriod;
         ALOGV("[%s] numPeriods = %" PRId64, mName, numPeriods);
@@ -384,13 +421,22 @@ DispSync::DispSync(const char* name) :
         mThread(new DispSyncThread(name)) {
 
     mThread->run("DispSync", PRIORITY_URGENT_DISPLAY + PRIORITY_MORE_FAVORABLE);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
     // set DispSync to SCHED_FIFO to minimize jitter
     struct sched_param param = {0};
-    param.sched_priority = 1;
+    param.sched_priority = 2;
     if (sched_setscheduler(mThread->getTid(), SCHED_FIFO, &param) != 0) {
         ALOGE("Couldn't set SCHED_FIFO for DispSyncThread");
     }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     android_set_rt_ioprio(mThread->getTid(), 1);
 
     reset();
@@ -443,12 +489,37 @@ bool DispSync::addPresentFence(const sp<Fence>& fence) {
 
     updateErrorLocked();
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+#ifdef HH_VSYNC_ISSUE
+    // This is a workaround for b/25845510.
+    // If we have no resync samples after many presents, something is wrong with
+    // HW vsync. Tell SF to disable HW vsync now and re-enable it next time.
+    if (mNumResyncSamples == 0 &&
+        mNumPresentWithoutResyncSamples++ > MAX_PRESENT_WITHOUT_RESYNC_SAMPLES) {
+        mNumPresentWithoutResyncSamples = 0;
+        return false;
+    }
+#endif
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     return !mModelUpdated || mError > kErrorThreshold;
 }
 
 void DispSync::beginResync() {
     Mutex::Autolock lock(mMutex);
+<<<<<<< HEAD
     ALOGV("[%s] beginResync", mName);
+=======
+<<<<<<< HEAD
+
+=======
+    ALOGV("[%s] beginResync", mName);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     mModelUpdated = false;
     mNumResyncSamples = 0;
 }
@@ -463,10 +534,19 @@ bool DispSync::addResyncSample(nsecs_t timestamp) {
     if (mNumResyncSamples == 0) {
         mPhase = 0;
         mReferenceTime = timestamp;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
         ALOGV("[%s] First resync sample: mPeriod = %" PRId64 ", mPhase = 0, "
                 "mReferenceTime = %" PRId64, mName, ns2us(mPeriod),
                 ns2us(mReferenceTime));
         mThread->updateModel(mPeriod, mPhase, mReferenceTime);
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 
     if (mNumResyncSamples < MAX_RESYNC_SAMPLES) {
@@ -490,12 +570,22 @@ bool DispSync::addResyncSample(nsecs_t timestamp) {
         return mThread->hasAnyEventListeners();
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    return !mModelUpdated || mError > kErrorThreshold;
+=======
+>>>>>>> CyanogenMod-cm-14.1
     // Check against kErrorThreshold / 2 to add some hysteresis before having to
     // resync again
     bool modelLocked = mModelUpdated && mError < (kErrorThreshold / 2);
     ALOGV("[%s] addResyncSample returning %s", mName,
             modelLocked ? "locked" : "unlocked");
     return !modelLocked;
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 void DispSync::endResync() {

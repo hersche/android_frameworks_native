@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 /* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+=======
+<<<<<<< HEAD
+/* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+=======
+/* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -72,13 +80,36 @@ static Rect getAspectRatio(const sp<const DisplayDevice>& hw,
 
 ExLayer::ExLayer(SurfaceFlinger* flinger, const sp<Client>& client,
                  const String8& name, uint32_t w, uint32_t h, uint32_t flags)
+<<<<<<< HEAD
     : Layer(flinger, client, name, w, h, flags),
       mMeshLeftTop(Mesh::TRIANGLE_FAN, 4, 2, 2),
       mMeshRightBottom(Mesh::TRIANGLE_FAN, 4, 2, 2) {
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+    : Layer(flinger, client, name, w, h, flags),
+      mMeshLeftTop(Mesh::TRIANGLE_FAN, 4, 2, 2),
+      mMeshRightBottom(Mesh::TRIANGLE_FAN, 4, 2, 2) {
+#else
+    : Layer(flinger, client, name, w, h, flags) {
+#endif
+=======
+    : Layer(flinger, client, name, w, h, flags),
+      mMeshLeftTop(Mesh::TRIANGLE_FAN, 4, 2, 2),
+      mMeshRightBottom(Mesh::TRIANGLE_FAN, 4, 2, 2) {
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     char property[PROPERTY_VALUE_MAX] = {0};
 
     mDebugLogs = false;
     mIsGPUAllowedForProtected = false;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    mIsHDMIPrimary = false;
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     if((property_get("persist.debug.qdframework.logs", property, NULL) > 0) &&
        (!strncmp(property, "1", PROPERTY_VALUE_MAX ) ||
         (!strncasecmp(property,"true", PROPERTY_VALUE_MAX )))) {
@@ -91,6 +122,18 @@ ExLayer::ExLayer(SurfaceFlinger* flinger, const sp<Client>& client,
            (atoi(property) == 1)) {
         mIsGPUAllowedForProtected = true;
     }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+    if ((property_get("persist.sys.is_hdmi_primary", property, NULL) > 0) &&
+           (atoi(property) == 1)) {
+        mIsHDMIPrimary = true;
+    }
+
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 ExLayer::~ExLayer() {
@@ -207,6 +250,96 @@ bool ExLayer::canAllowGPUForProtected() const {
     }
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+void ExLayer::drawWithOpenGL(const sp<const DisplayDevice>& hw,
+        const Region& /* clip */, bool useIdentityTransform) const {
+    const State& s(getDrawingState());
+#if defined(QTI_BSP) && defined(SDM_TARGET)
+    uint32_t s3d_fmt = 0;
+    private_handle_t *pvt_handle = static_cast<private_handle_t *>
+                                    (const_cast<native_handle_t*>(mActiveBuffer->handle));
+    if (pvt_handle != NULL) {
+        struct S3DSFRender_t s3dRender;
+        getMetaData(pvt_handle, GET_S3D_RENDER, &s3dRender);
+
+        if ((s3dRender.DisplayId == static_cast<uint32_t>(hw->getHwcDisplayId()) ||
+            mIsHDMIPrimary) && s3dRender.GpuRender) {
+            clearMetaData(pvt_handle, SET_S3D_RENDER);
+            s3d_fmt = s3dRender.GpuS3dFormat;
+        }
+    }
+#endif
+    computeGeometry(hw, mMesh, useIdentityTransform);
+
+    /*
+     * NOTE: the way we compute the texture coordinates here produces
+     * different results than when we take the HWC path -- in the later case
+     * the "source crop" is rounded to texel boundaries.
+     * This can produce significantly different results when the texture
+     * is scaled by a large amount.
+     *
+     * The GL code below is more logical (imho), and the difference with
+     * HWC is due to a limitation of the HWC API to integers -- a question
+     * is suspend is whether we should ignore this problem or revert to
+     * GL composition when a buffer scaling is applied (maybe with some
+     * minimal value)? Or, we could make GL behave like HWC -- but this feel
+     * like more of a hack.
+     */
+    Rect win(s.active.w, s.active.h);
+    if(!s.active.crop.isEmpty()) {
+        win = s.active.crop;
+    }
+#ifdef QTI_BSP
+    win = s.transform.transform(win);
+    win.intersect(hw->getViewport(), &win);
+    win = s.transform.inverse().transform(win);
+    win.intersect(Rect(s.active.w, s.active.h), &win);
+    win = reduce(win, s.activeTransparentRegion);
+#else
+    win = reduce(win, s.activeTransparentRegion);
+#endif
+    float left   = float(win.left)   / float(s.active.w);
+    float top    = float(win.top)    / float(s.active.h);
+    float right  = float(win.right)  / float(s.active.w);
+    float bottom = float(win.bottom) / float(s.active.h);
+
+    // TODO: we probably want to generate the texture coords with the mesh
+    // here we assume that we only have 4 vertices
+    Mesh::VertexArray<vec2> texCoords(mMesh.getTexCoordArray<vec2>());
+    texCoords[0] = vec2(left, 1.0f - top);
+    texCoords[1] = vec2(left, 1.0f - bottom);
+    texCoords[2] = vec2(right, 1.0f - bottom);
+    texCoords[3] = vec2(right, 1.0f - top);
+
+#if defined(QTI_BSP) && defined(SDM_TARGET)
+    computeGeometryS3D(hw, mMesh, mMeshLeftTop, mMeshRightBottom, s3d_fmt);
+#endif
+
+    RenderEngine& engine(mFlinger->getRenderEngine());
+    engine.setupLayerBlending(mPremultipliedAlpha, isOpaque(s), s.alpha);
+
+#if defined(QTI_BSP) && defined(SDM_TARGET)
+    if (s3d_fmt != HWC_S3DMODE_NONE) {
+        engine.setScissor(0, 0, hw->getWidth(), hw->getHeight());
+        engine.drawMesh(mMeshLeftTop);
+        engine.drawMesh(mMeshRightBottom);
+    } else {
+#endif
+        engine.drawMesh(mMesh);
+#if defined(QTI_BSP) && defined(SDM_TARGET)
+    }
+#endif
+
+    engine.disableBlending();
+}
+
+#ifdef QTI_BSP
+void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
+        Mesh& meshLeftTop, Mesh &meshRightBottom, uint32_t s3d_fmt) const
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #if (defined QTI_BSP) && (defined QTI_S3D)
 uint32_t ExLayer::getS3dFormat(const sp<const DisplayDevice>& hw) const {
     uint32_t s3d_fmt = HWC_S3DMODE_NONE;
@@ -249,6 +382,10 @@ void ExLayer::clearS3dFormat(const sp<const DisplayDevice>& hw) const {
 
 void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
         Mesh& meshLeftTop, Mesh& meshRightBottom, uint32_t s3d_fmt) const
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 {
     Mesh::VertexArray<vec2> position(mesh.getPositionArray<vec2>());
     Mesh::VertexArray<vec2> positionLeftTop(meshLeftTop.getPositionArray<vec2>());
@@ -259,6 +396,16 @@ void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
 
     Rect scissor = hw->getBounds();
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    if(s3d_fmt == HWC_S3DMODE_NONE) {
+        return;
+    }
+
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     uint32_t count = mesh.getVertexCount();
     while(count--) {
         positionLeftTop[count] = positionRightBottom[count] = position[count];
@@ -326,6 +473,11 @@ void ExLayer::computeGeometryS3D(const sp<const DisplayDevice>& hw, Mesh& mesh,
             break;
     }
 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 
 void ExLayer::handleOpenGLDraw(const sp<const DisplayDevice>& hw,
     Mesh& mesh) const
@@ -367,6 +519,10 @@ void ExLayer::handleOpenGLDraw(const sp<const DisplayDevice>& /* hw */,
     engine.drawMesh(mesh);
     engine.disableBlending();
 }
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #endif
 
 }; // namespace android

@@ -101,8 +101,16 @@ Layer::Layer(SurfaceFlinger* flinger, const sp<Client>& client,
         mQueueItems(),
         mLastFrameNumberReceived(0),
         mUpdateTexImageFailed(false),
+<<<<<<< HEAD
         mAutoRefresh(false),
         mFreezePositionUpdates(false),
+=======
+<<<<<<< HEAD
+=======
+        mAutoRefresh(false),
+        mFreezePositionUpdates(false),
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         mTransformHint(0)
 {
 #ifdef USE_HWC2
@@ -128,15 +136,33 @@ Layer::Layer(SurfaceFlinger* flinger, const sp<Client>& client,
 
     mCurrentState.active.w = w;
     mCurrentState.active.h = h;
+<<<<<<< HEAD
     mCurrentState.active.transform.set(0, 0);
     mCurrentState.crop.makeInvalid();
     mCurrentState.finalCrop.makeInvalid();
+=======
+<<<<<<< HEAD
+    mCurrentState.active.crop.makeInvalid();
+    mCurrentState.active.isPositionPending = false;
+=======
+    mCurrentState.active.transform.set(0, 0);
+    mCurrentState.crop.makeInvalid();
+    mCurrentState.finalCrop.makeInvalid();
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     mCurrentState.z = 0;
 #ifdef USE_HWC2
     mCurrentState.alpha = 1.0f;
 #else
     mCurrentState.alpha = 0xFF;
+<<<<<<< HEAD
 #endif
+=======
+<<<<<<< HEAD
+=======
+#endif
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     mCurrentState.blur = 0xFF;
     mCurrentState.layerStack = 0;
     mCurrentState.flags = layerFlags;
@@ -536,6 +562,11 @@ void Layer::setGeometry(
 
     // this gives us only the "orientation" component of the transform
     const State& s(getDrawingState());
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #ifdef USE_HWC2
     if (!isOpaque(s) || s.alpha != 1.0f) {
         auto blendMode = mPremultipliedAlpha ?
@@ -546,6 +577,10 @@ void Layer::setGeometry(
                 to_string(error).c_str(), static_cast<int32_t>(error));
     }
 #else
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #if defined(QTI_BSP) && !defined(QCOM_BSP_LEGACY)
     if (!isOpaque(s)) {
 #else
@@ -602,19 +637,25 @@ void Layer::setGeometry(
     const Transform& tr(displayDevice->getTransform());
     Rect transformedFrame = tr.transform(frame);
     auto error = hwcLayer->setDisplayFrame(transformedFrame);
-    ALOGE_IF(error != HWC2::Error::None, "[%s] Failed to set display frame "
-            "[%d, %d, %d, %d]: %s (%d)", mName.string(), transformedFrame.left,
-            transformedFrame.top, transformedFrame.right,
-            transformedFrame.bottom, to_string(error).c_str(),
-            static_cast<int32_t>(error));
+    if (error != HWC2::Error::None) {
+        ALOGE("[%s] Failed to set display frame [%d, %d, %d, %d]: %s (%d)",
+                mName.string(), transformedFrame.left, transformedFrame.top,
+                transformedFrame.right, transformedFrame.bottom,
+                to_string(error).c_str(), static_cast<int32_t>(error));
+    } else {
+        hwcInfo.displayFrame = transformedFrame;
+    }
 
     FloatRect sourceCrop = computeCrop(displayDevice);
     error = hwcLayer->setSourceCrop(sourceCrop);
-    ALOGE_IF(error != HWC2::Error::None, "[%s] Failed to set source crop "
-            "[%.3f, %.3f, %.3f, %.3f]: %s (%d)", mName.string(),
-            sourceCrop.left, sourceCrop.top, sourceCrop.right,
-            sourceCrop.bottom, to_string(error).c_str(),
-            static_cast<int32_t>(error));
+    if (error != HWC2::Error::None) {
+        ALOGE("[%s] Failed to set source crop [%.3f, %.3f, %.3f, %.3f]: "
+                "%s (%d)", mName.string(), sourceCrop.left, sourceCrop.top,
+                sourceCrop.right, sourceCrop.bottom, to_string(error).c_str(),
+                static_cast<int32_t>(error));
+    } else {
+        hwcInfo.sourceCrop = sourceCrop;
+    }
 
     error = hwcLayer->setPlaneAlpha(s.alpha);
     ALOGE_IF(error != HWC2::Error::None, "[%s] Failed to set plane alpha %.3f: "
@@ -952,7 +993,14 @@ void Layer::onDraw(const sp<const DisplayDevice>& hw, const Region& clip,
     bool blackOutLayer = isProtected() || (isSecure() && !hw->isSecure());
 
     RenderEngine& engine(mFlinger->getRenderEngine());
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     if (!blackOutLayer ||
             ((hw->getDisplayType() == HWC_DISPLAY_PRIMARY) && canAllowGPUForProtected())) {
         // TODO: we could be more subtle with isFixedSize()
@@ -1052,6 +1100,23 @@ void Layer::drawWithOpenGL(const sp<const DisplayDevice>& hw,
      * minimal value)? Or, we could make GL behave like HWC -- but this feel
      * like more of a hack.
      */
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    Rect win(s.active.w, s.active.h);
+    if(!s.active.crop.isEmpty()) {
+        win = s.active.crop;
+    }
+#ifdef QTI_BSP
+    win = s.transform.transform(win);
+    win.intersect(hw->getViewport(), &win);
+    win = s.transform.inverse().transform(win);
+    win.intersect(Rect(s.active.w, s.active.h), &win);
+    win = reduce(win, s.activeTransparentRegion);
+#else
+    win = reduce(win, s.activeTransparentRegion);
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #ifdef QTI_BSP
     Rect win(s.active.w, s.active.h);
 
@@ -1077,6 +1142,10 @@ void Layer::drawWithOpenGL(const sp<const DisplayDevice>& hw,
             win.clear();
         }
     }
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #endif
     float left   = float(win.left)   / float(s.active.w);
     float top    = float(win.top)    / float(s.active.h);
@@ -1268,13 +1337,62 @@ void Layer::computeGeometry(const sp<const DisplayDevice>& hw, Mesh& mesh,
         bool useIdentityTransform) const
 {
     const Layer::State& s(getDrawingState());
+<<<<<<< HEAD
     const Transform tr(hw->getTransform());
+=======
+<<<<<<< HEAD
+    Transform tr(useIdentityTransform ?
+            hw->getTransform() : hw->getTransform() * s.transform);
+=======
+    const Transform tr(hw->getTransform());
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     const uint32_t hw_h = hw->getHeight();
     Rect win(s.active.w, s.active.h);
     if (!s.crop.isEmpty()) {
         win.intersect(s.crop, &win);
     }
 #ifdef QTI_BSP
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    win = s.transform.transform(win);
+    win.intersect(hw->getViewport(), &win);
+    win = s.transform.inverse().transform(win);
+    win.intersect(Rect(s.active.w, s.active.h), &win);
+    win = reduce(win, s.activeTransparentRegion);
+    const Transform bufferOrientation(mCurrentTransform);
+    Transform transform(tr * s.transform * bufferOrientation);
+    if (mSurfaceFlingerConsumer->getTransformToDisplayInverse()) {
+        uint32_t invTransform = hw->getOrientationTransform();
+        uint32_t t_orientation = transform.getOrientation();
+        if (invTransform & NATIVE_WINDOW_TRANSFORM_ROT_90) {
+            invTransform ^= NATIVE_WINDOW_TRANSFORM_FLIP_V |
+                    NATIVE_WINDOW_TRANSFORM_FLIP_H;
+            bool is_h_flipped = (t_orientation &
+                                 NATIVE_WINDOW_TRANSFORM_FLIP_H) != 0;
+            bool is_v_flipped = (t_orientation &
+                                 NATIVE_WINDOW_TRANSFORM_FLIP_V) != 0;
+            if (is_h_flipped != is_v_flipped) {
+                t_orientation ^= NATIVE_WINDOW_TRANSFORM_FLIP_V |
+                        NATIVE_WINDOW_TRANSFORM_FLIP_H;
+            }
+            transform = Transform(t_orientation) * Transform(invTransform);
+        }
+    }
+    const uint32_t orientation = transform.getOrientation();
+    if (!(mTransformHint | mCurrentTransform | orientation)) {
+        tr = hw->getTransform();
+        if (!useIdentityTransform) {
+            win = s.transform.transform(win);
+            win.intersect(hw->getViewport(), &win);
+        }
+    }
+#else
+    win = reduce(win, s.activeTransparentRegion);
+#endif
+=======
+>>>>>>> CyanogenMod-cm-14.1
     win = s.active.transform.transform(win);
     win.intersect(hw->getViewport(), &win);
     win = s.active.transform.inverse().transform(win);
@@ -1333,6 +1451,10 @@ void Layer::computeGeometry(const sp<const DisplayDevice>& hw, Mesh& mesh,
         boundPoint(&rt, s.finalCrop);
     }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     Mesh::VertexArray<vec2> position(mesh.getPositionArray<vec2>());
     position[0] = tr.transform(lt);
     position[1] = tr.transform(lb);
@@ -1586,6 +1708,23 @@ uint32_t Layer::doTransaction(uint32_t flags) {
     if (flags & eDontUpdateGeometryState)  {
     } else {
         Layer::State& editCurrentState(getCurrentState());
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        // If a position change was requested, and we have the correct
+        // buffer size, no need to delay, update state now.
+        if (editCurrentState.requested.isPositionPending) {
+            float requestedX = editCurrentState.requested.x;
+            float requestedY = editCurrentState.requested.y;
+            if (requestedX != editCurrentState.active.x ||
+                requestedY != editCurrentState.active.y) {
+                editCurrentState.requested.isPositionPending = false;
+                editCurrentState.transform.set(requestedX, requestedY);
+            }
+        }
+        editCurrentState.active = c.requested;
+=======
+>>>>>>> CyanogenMod-cm-14.1
         if (mFreezePositionUpdates) {
             float tx = c.active.transform.tx();
             float ty = c.active.transform.ty();
@@ -1596,6 +1735,10 @@ uint32_t Layer::doTransaction(uint32_t flags) {
             editCurrentState.active = editCurrentState.requested;
             c.active = c.requested;
         }
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 
     if (s.active != c.active) {
@@ -1642,6 +1785,21 @@ uint32_t Layer::setTransactionFlags(uint32_t flags) {
     return android_atomic_or(flags, &mTransactionFlags);
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+bool Layer::setPosition(float x, float y) {
+    if ((mCurrentState.transform.tx() == x && mCurrentState.transform.ty() == y
+        && !mCurrentState.requested.isPositionPending) ||
+        (mCurrentState.requested.isPositionPending && mCurrentState.requested.x == x
+            && mCurrentState.requested.y == y))
+        return false;
+    mCurrentState.sequence++;
+    mCurrentState.requested.x = x;
+    mCurrentState.requested.y = y;
+    mCurrentState.requested.isPositionPending = true;
+=======
+>>>>>>> CyanogenMod-cm-14.1
 bool Layer::setPosition(float x, float y, bool immediate) {
     if (mCurrentState.requested.transform.tx() == x && mCurrentState.requested.transform.ty() == y)
         return false;
@@ -1657,6 +1815,10 @@ bool Layer::setPosition(float x, float y, bool immediate) {
     mFreezePositionUpdates = mFreezePositionUpdates || !immediate;
 
     mCurrentState.modified = true;
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     setTransactionFlags(eTransactionNeeded);
     return true;
 }
@@ -2261,7 +2423,15 @@ uint32_t Layer::getEffectiveUsage(uint32_t usage) const
     return usage;
 }
 
+<<<<<<< HEAD
 void Layer::updateTransformHint(const sp<const DisplayDevice>& hw) {
+=======
+<<<<<<< HEAD
+void Layer::updateTransformHint(const sp<const DisplayDevice>& hw)  {
+=======
+void Layer::updateTransformHint(const sp<const DisplayDevice>& hw) {
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     uint32_t orientation = 0;
     if (!mFlinger->mDebugDisableTransformHint) {
         // The transform hint is used to improve performance, but we can
@@ -2300,11 +2470,21 @@ void Layer::dump(String8& result, Colorizer& colorizer) const
             "layerStack=%4d, z=%9d, pos=(%g,%g), size=(%4d,%4d), "
             "crop=(%4d,%4d,%4d,%4d), finalCrop=(%4d,%4d,%4d,%4d), "
             "isOpaque=%1d, invalidate=%1d, "
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+            "alpha=0x%02x, blur=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n"
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #ifdef USE_HWC2
             "alpha=%.3f, blur=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n"
 #else
             "alpha=0x%02x, blur=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n"
 #endif
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             "      client=%p\n",
             s.layerStack, s.z, s.active.transform.tx(), s.active.transform.ty(), s.active.w, s.active.h,
             s.crop.left, s.crop.top,
@@ -2313,8 +2493,18 @@ void Layer::dump(String8& result, Colorizer& colorizer) const
             s.finalCrop.right, s.finalCrop.bottom,
             isOpaque(s), contentDirty,
             s.alpha, s.blur, s.flags,
+<<<<<<< HEAD
             s.active.transform[0][0], s.active.transform[0][1],
             s.active.transform[1][0], s.active.transform[1][1],
+=======
+<<<<<<< HEAD
+            s.transform[0][0], s.transform[0][1],
+            s.transform[1][0], s.transform[1][1],
+=======
+            s.active.transform[0][0], s.active.transform[0][1],
+            s.active.transform[1][0], s.active.transform[1][1],
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             client.get());
 
     sp<const GraphicBuffer> buf0(mActiveBuffer);
@@ -2336,6 +2526,54 @@ void Layer::dump(String8& result, Colorizer& colorizer) const
         mSurfaceFlingerConsumer->dumpState(result, "            ");
     }
 }
+
+#ifdef USE_HWC2
+void Layer::miniDumpHeader(String8& result) {
+    result.append("----------------------------------------");
+    result.append("---------------------------------------\n");
+    result.append(" Layer name\n");
+    result.append("           Z | ");
+    result.append(" Comp Type | ");
+    result.append("  Disp Frame (LTRB) | ");
+    result.append("         Source Crop (LTRB)\n");
+    result.append("----------------------------------------");
+    result.append("---------------------------------------\n");
+}
+
+void Layer::miniDump(String8& result, int32_t hwcId) const {
+    if (mHwcLayers.count(hwcId) == 0) {
+        return;
+    }
+
+    String8 name;
+    if (mName.length() > 77) {
+        std::string shortened;
+        shortened.append(mName.string(), 36);
+        shortened.append("[...]");
+        shortened.append(mName.string() + (mName.length() - 36), 36);
+        name = shortened.c_str();
+    } else {
+        name = mName;
+    }
+
+    result.appendFormat(" %s\n", name.string());
+
+    const Layer::State& layerState(getDrawingState());
+    const HWCInfo& hwcInfo = mHwcLayers.at(hwcId);
+    result.appendFormat("  %10u | ", layerState.z);
+    result.appendFormat("%10s | ",
+            to_string(getCompositionType(hwcId)).c_str());
+    const Rect& frame = hwcInfo.displayFrame;
+    result.appendFormat("%4d %4d %4d %4d | ", frame.left, frame.top,
+            frame.right, frame.bottom);
+    const FloatRect& crop = hwcInfo.sourceCrop;
+    result.appendFormat("%6.1f %6.1f %6.1f %6.1f\n", crop.left, crop.top,
+            crop.right, crop.bottom);
+
+    result.append("- - - - - - - - - - - - - - - - - - - - ");
+    result.append("- - - - - - - - - - - - - - - - - - - -\n");
+}
+#endif
 
 void Layer::dumpFrameStats(String8& result) const {
     mFrameTracker.dumpStats(result);

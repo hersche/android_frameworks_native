@@ -54,8 +54,26 @@
 using android::base::EndsWith;
 using android::base::StringPrintf;
 
+<<<<<<< HEAD
 namespace android {
 namespace installd {
+=======
+<<<<<<< HEAD
+/* Directory records that are used in execution of commands. */
+dir_rec_t android_data_dir;
+dir_rec_t android_asec_dir;
+dir_rec_t android_app_dir;
+dir_rec_t android_app_private_dir;
+dir_rec_t android_app_lib_dir;
+dir_rec_t android_media_dir;
+dir_rec_t android_mnt_expand_dir;
+dir_rec_t android_prebundled_dir;
+dir_rec_array_t android_system_dirs;
+=======
+namespace android {
+namespace installd {
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
 static constexpr const char* kCpPath = "/system/bin/cp";
 static constexpr const char* kXattrDefault = "user.default";
@@ -99,23 +117,69 @@ static std::string create_primary_profile(const std::string& profile_dir) {
     return StringPrintf("%s/%s", profile_dir.c_str(), PRIMARY_PROFILE_NAME);
 }
 
-static int prepare_app_dir(const std::string& path, mode_t target_mode, uid_t uid,
-        const char* pkgname, const char* seinfo) {
+/**
+ * Perform restorecon of the given path, but only perform recursive restorecon
+ * if the label of that top-level file actually changed.  This can save us
+ * significant time by avoiding no-op traversals of large filesystem trees.
+ */
+static int restorecon_app_data_lazy(const std::string& path, const char* seinfo, uid_t uid) {
+    int res = 0;
+    char* before = nullptr;
+    char* after = nullptr;
+
+    // Note that SELINUX_ANDROID_RESTORECON_DATADATA flag is set by
+    // libselinux. Not needed here.
+
+    if (lgetfilecon(path.c_str(), &before) < 0) {
+        PLOG(ERROR) << "Failed before getfilecon for " << path;
+        goto fail;
+    }
+    if (selinux_android_restorecon_pkgdir(path.c_str(), seinfo, uid, 0) < 0) {
+        PLOG(ERROR) << "Failed top-level restorecon for " << path;
+        goto fail;
+    }
+    if (lgetfilecon(path.c_str(), &after) < 0) {
+        PLOG(ERROR) << "Failed after getfilecon for " << path;
+        goto fail;
+    }
+
+    // If the initial top-level restorecon above changed the label, then go
+    // back and restorecon everything recursively
+    if (strcmp(before, after)) {
+        LOG(DEBUG) << "Detected label change from " << before << " to " << after << " at " << path
+                << "; running recursive restorecon";
+        if (selinux_android_restorecon_pkgdir(path.c_str(), seinfo, uid,
+                SELINUX_ANDROID_RESTORECON_RECURSE) < 0) {
+            PLOG(ERROR) << "Failed recursive restorecon for " << path;
+            goto fail;
+        }
+    }
+
+    goto done;
+fail:
+    res = -1;
+done:
+    free(before);
+    free(after);
+    return res;
+}
+
+static int restorecon_app_data_lazy(const std::string& parent, const char* name, const char* seinfo,
+        uid_t uid) {
+    return restorecon_app_data_lazy(StringPrintf("%s/%s", parent.c_str(), name), seinfo, uid);
+}
+
+static int prepare_app_dir(const std::string& path, mode_t target_mode, uid_t uid) {
     if (fs_prepare_dir_strict(path.c_str(), target_mode, uid, uid) != 0) {
         PLOG(ERROR) << "Failed to prepare " << path;
-        return -1;
-    }
-    if (selinux_android_setfilecon(path.c_str(), pkgname, seinfo, uid) < 0) {
-        PLOG(ERROR) << "Failed to setfilecon " << path;
         return -1;
     }
     return 0;
 }
 
 static int prepare_app_dir(const std::string& parent, const char* name, mode_t target_mode,
-        uid_t uid, const char* pkgname, const char* seinfo) {
-    return prepare_app_dir(StringPrintf("%s/%s", parent.c_str(), name), target_mode, uid, pkgname,
-            seinfo);
+        uid_t uid) {
+    return prepare_app_dir(StringPrintf("%s/%s", parent.c_str(), name), target_mode, uid);
 }
 
 int create_app_data(const char *uuid, const char *pkgname, userid_t userid, int flags,
@@ -124,9 +188,16 @@ int create_app_data(const char *uuid, const char *pkgname, userid_t userid, int 
     mode_t target_mode = target_sdk_version >= MIN_RESTRICTED_HOME_SDK_VERSION ? 0700 : 0751;
     if (flags & FLAG_STORAGE_CE) {
         auto path = create_data_user_ce_package_path(uuid, userid, pkgname);
-        if (prepare_app_dir(path, target_mode, uid, pkgname, seinfo) ||
-                prepare_app_dir(path, "cache", 0771, uid, pkgname, seinfo) ||
-                prepare_app_dir(path, "code_cache", 0771, uid, pkgname, seinfo)) {
+        if (prepare_app_dir(path, target_mode, uid) ||
+                prepare_app_dir(path, "cache", 0771, uid) ||
+                prepare_app_dir(path, "code_cache", 0771, uid)) {
+            return -1;
+        }
+
+        // Consider restorecon over contents if label changed
+        if (restorecon_app_data_lazy(path, seinfo, uid) ||
+                restorecon_app_data_lazy(path, "cache", seinfo, uid) ||
+                restorecon_app_data_lazy(path, "code_cache", seinfo, uid)) {
             return -1;
         }
 
@@ -139,9 +210,14 @@ int create_app_data(const char *uuid, const char *pkgname, userid_t userid, int 
     }
     if (flags & FLAG_STORAGE_DE) {
         auto path = create_data_user_de_package_path(uuid, userid, pkgname);
-        if (prepare_app_dir(path, target_mode, uid, pkgname, seinfo)) {
+        if (prepare_app_dir(path, target_mode, uid)) {
             // TODO: include result once 25796509 is fixed
             return 0;
+        }
+
+        // Consider restorecon over contents if label changed
+        if (restorecon_app_data_lazy(path, seinfo, uid)) {
+            return -1;
         }
 
         if (property_get_bool("dalvik.vm.usejitprofiles")) {
@@ -1985,9 +2061,193 @@ fail:
     return -1;
 }
 
+<<<<<<< HEAD
 int restorecon_app_data(const char* uuid, const char* pkgName, userid_t userid, int flags,
         appid_t appid, const char* seinfo) {
     int res = 0;
+=======
+<<<<<<< HEAD
+static void run_aapt(const char *source_apk, const char *internal_path,
+                     int resapk_fd, int pkgId, int min_sdk_version,
+                     const char *app_res_path, const char *common_res_path)
+{
+    static const char *AAPT_BIN = "/system/bin/aapt";
+    static const char *MANIFEST = "/data/app/AndroidManifest.xml";
+    static const char *FRAMEWORK_RES = "/system/framework/framework-res.apk";
+
+    static const size_t MAX_INT_LEN = 32;
+    char resapk_str[MAX_INT_LEN];
+    char pkgId_str[MAX_INT_LEN];
+    char minSdkVersion_str[MAX_INT_LEN];
+
+    snprintf(resapk_str, sizeof(resapk_str), "%d", resapk_fd);
+    snprintf(pkgId_str, sizeof(pkgId_str), "%d", pkgId);
+    snprintf(minSdkVersion_str, sizeof(minSdkVersion_str), "%d", min_sdk_version);
+
+    bool hasCommonResources = (common_res_path != NULL && common_res_path[0] != '\0');
+    bool hasAppResources = (app_res_path != NULL && app_res_path[0] != '\0');
+
+    if (hasCommonResources) {
+        execl(AAPT_BIN, AAPT_BIN, "package",
+                          "--min-sdk-version", minSdkVersion_str,
+                          "-M", MANIFEST,
+                          "-S", source_apk,
+                          "-X", internal_path,
+                          "-I", FRAMEWORK_RES,
+                          "-r", resapk_str,
+                          "-x", pkgId_str,
+                          "-f",
+                          "-I", common_res_path,
+                          hasAppResources ? "-I" : (char*)NULL,
+                          hasAppResources ? app_res_path : (char*) NULL,
+                          (char*)NULL);
+    } else {
+        execl(AAPT_BIN, AAPT_BIN, "package",
+                          "--min-sdk-version", minSdkVersion_str,
+                          "-M", MANIFEST,
+                          "-S", source_apk,
+                          "-X", internal_path,
+                          "-I", FRAMEWORK_RES,
+                          "-r", resapk_str,
+                          "-x", pkgId_str,
+                          "-f",
+                          hasAppResources ? "-I" : (char*)NULL,
+                          hasAppResources ? app_res_path : (char*) NULL,
+                          (char*)NULL);
+    }
+    ALOGE("execl(%s) failed: %s\n", AAPT_BIN, strerror(errno));
+}
+
+int aapt(const char *source_apk, const char *internal_path, const char *out_restable, uid_t uid,
+         int pkgId, int min_sdk_version, const char *app_res_path, const char *common_res_path)
+{
+    ALOGD("aapt source_apk=%s internal_path=%s out_restable=%s uid=%d, pkgId=%d,min_sdk_version=%d,\
+            app_res_path=%s, common_res_path=%s",
+            source_apk, internal_path, out_restable, uid, pkgId, min_sdk_version, app_res_path,
+            common_res_path);
+    static const int PARENT_READ_PIPE = 0;
+    static const int CHILD_WRITE_PIPE = 1;
+
+    int resapk_fd = -1;
+    char restable_path[PATH_MAX];
+    char resapk_path[PATH_MAX];
+
+    // create pipes for redirecting STDERR to a buffer that can be displayed in logcat
+    int pipefd[2];
+    if (pipe(pipefd) != 0) {
+        pipefd[0] = pipefd[1] = -1;
+    }
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        // get file descriptor for resources.arsc
+        snprintf(restable_path, PATH_MAX, "%s/resources.arsc", out_restable);
+        unlink(restable_path);
+
+        // get file descriptor for resources.apk
+        snprintf(resapk_path, PATH_MAX, "%s/resources.apk", out_restable);
+        unlink(resapk_path);
+        resapk_fd = open(resapk_path, O_RDWR | O_CREAT | O_EXCL, 0644);
+        if (resapk_fd < 0) {
+            ALOGE("aapt cannot open '%s' for output: %s\n", resapk_path, strerror(errno));
+            goto fail;
+        }
+        if (fchown(resapk_fd, AID_SYSTEM, uid) < 0) {
+            ALOGE("aapt cannot chown '%s'\n", resapk_path);
+            goto fail;
+        }
+        if (fchmod(resapk_fd, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0) {
+            ALOGE("aapt cannot chmod '%s'\n", resapk_path);
+            goto fail;
+        }
+
+        /* child -- drop privileges before continuing */
+        if (setgid(uid) != 0) {
+            ALOGE("setgid(%d) failed during aapt\n", uid);
+            exit(1);
+        }
+        if (setuid(uid) != 0) {
+            ALOGE("setuid(%d) failed during aapt\n", uid);
+            exit(1);
+        }
+
+        if (flock(resapk_fd, LOCK_EX | LOCK_NB) != 0) {
+            ALOGE("flock(%s) failed during aapt: %s\n", out_restable, strerror(errno));
+            exit(1);
+        }
+
+        if (pipefd[PARENT_READ_PIPE] > 0 && pipefd[CHILD_WRITE_PIPE] > 0) {
+            close(pipefd[PARENT_READ_PIPE]); // close unused read end
+            if (dup2(pipefd[CHILD_WRITE_PIPE], STDERR_FILENO) != STDERR_FILENO) {
+                pipefd[CHILD_WRITE_PIPE] = -1;
+            }
+        }
+
+        run_aapt(source_apk, internal_path, resapk_fd, pkgId, min_sdk_version, app_res_path,
+                common_res_path);
+
+        close(resapk_fd);
+        if (pipefd[CHILD_WRITE_PIPE] > 0) {
+            close(pipefd[CHILD_WRITE_PIPE]);
+        }
+        exit(1); /* only if exec call to idmap failed */
+    } else {
+        int status, i;
+        char buffer[1024];
+        ssize_t readlen;
+
+        if (pipefd[CHILD_WRITE_PIPE] > 0) {
+            close(pipefd[CHILD_WRITE_PIPE]); // close unused write end
+        }
+
+        if (pipefd[PARENT_READ_PIPE] > 0) {
+            while ((readlen = read(pipefd[PARENT_READ_PIPE], buffer, sizeof(buffer) - 1)) > 0) {
+                // in case buffer has more than one string in it, replace '\0' with '\n'
+                for (i = 0; i < readlen; i++) {
+                    if (buffer[i] == '\0') buffer[i] = '\n';
+                }
+                // null terminate buffer at readlen
+                buffer[readlen] = '\0';
+                ALOG(LOG_ERROR, "InstallTheme", "%s", buffer);
+            }
+            waitpid(pid, &status, 0);
+
+            if (pipefd[PARENT_READ_PIPE] > 0) {
+                close(pipefd[PARENT_READ_PIPE]);
+            }
+        } else {
+            status = wait_child(pid);
+        }
+
+        if (status != 0) {
+            ALOGE("aapt failed, status=0x%04x\n", status);
+            goto fail;
+        }
+    }
+
+    return 0;
+fail:
+    if (resapk_fd >= 0) {
+        close(resapk_fd);
+        unlink(resapk_path);
+    }
+    return -1;
+}
+
+int restorecon_data(const char* uuid, const char* pkgName,
+                    const char* seinfo, uid_t uid)
+{
+    struct dirent *entry;
+    DIR *d;
+    struct stat s;
+    int ret = 0;
+=======
+int restorecon_app_data(const char* uuid, const char* pkgName, userid_t userid, int flags,
+        appid_t appid, const char* seinfo) {
+    int res = 0;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     // SELINUX_ANDROID_RESTORECON_DATADATA flag is set by libselinux. Not needed here.
     unsigned int seflags = SELINUX_ANDROID_RESTORECON_RECURSE;
@@ -2186,6 +2446,9 @@ int move_ab(const char* apk_path, const char* instruction_set, const char* oat_d
         bool art_success = true;
         if (!a_image_path.empty()) {
             art_success = move_ab_path(b_image_path, a_image_path);
+            if (!art_success) {
+                unlink(a_image_path.c_str());
+            }
         }
 
         success = art_success || kIgnoreAppImageFailure;
@@ -2197,6 +2460,36 @@ int move_ab(const char* apk_path, const char* instruction_set, const char* oat_d
     }
 
     return success ? 0 : -1;
+}
+
+bool delete_odex(const char *apk_path, const char *instruction_set, const char *oat_dir) {
+    // Delete the oat/odex file.
+    char out_path[PKG_PATH_MAX];
+    if (!create_oat_out_path(apk_path, instruction_set, oat_dir, out_path)) {
+        return false;
+    }
+
+    // In case of a permission failure report the issue. Otherwise just print a warning.
+    auto unlink_and_check = [](const char* path) -> bool {
+        int result = unlink(path);
+        if (result != 0) {
+            if (errno == EACCES || errno == EPERM) {
+                PLOG(ERROR) << "Could not unlink " << path;
+                return false;
+            }
+            PLOG(WARNING) << "Could not unlink " << path;
+        }
+        return true;
+    };
+
+    // Delete the oat/odex file.
+    bool return_value_oat = unlink_and_check(out_path);
+
+    // Derive and delete the app image.
+    bool return_value_art = unlink_and_check(create_image_filename(out_path).c_str());
+
+    // Report success.
+    return return_value_oat && return_value_art;
 }
 
 }  // namespace installd

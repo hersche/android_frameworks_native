@@ -201,6 +201,18 @@ void SensorService::onFirstRef() {
                 registerSensor(new LinearAccelerationSensor(list, count),
                                !needLinearAcceleration, true);
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                aSensor = registerVirtualSensor( new OrientationSensor() );
+                if (virtualSensorsNeeds & (1<<SENSOR_TYPE_ROTATION_VECTOR)) {
+                    if (orientationIndex == -1) {
+                        // some sensor HALs don't provide an orientation sensor.
+                        mUserSensorList.add(aSensor);
+                    }
+                }
+=======
+>>>>>>> CyanogenMod-cm-14.1
                 // virtual debugging sensors are not for user
                 registerSensor( new CorrectedGyroSensor(list, count), true, true);
                 registerSensor( new GyroDriftSensor(), true, true);
@@ -209,6 +221,10 @@ void SensorService::onFirstRef() {
             if (hasAccel && hasGyro) {
                 bool needGravitySensor = (virtualSensorsNeeds & (1<<SENSOR_TYPE_GRAVITY)) != 0;
                 registerSensor(new GravitySensor(list, count), !needGravitySensor, true);
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
                 bool needGameRotationVector =
                         (virtualSensorsNeeds & (1<<SENSOR_TYPE_GAME_ROTATION_VECTOR)) != 0;
@@ -260,7 +276,7 @@ void SensorService::onFirstRef() {
             const size_t minBufferSize = SensorEventQueue::MAX_RECEIVE_BUFFER_EVENT_COUNT;
             mSensorEventBuffer = new sensors_event_t[minBufferSize];
             mSensorEventScratch = new sensors_event_t[minBufferSize];
-            mMapFlushEventsToConnections = new SensorEventConnection const * [minBufferSize];
+            mMapFlushEventsToConnections = new wp<const SensorEventConnection> [minBufferSize];
             mCurrentOperatingMode = NORMAL;
 
             mNextSensorRegIndex = 0;
@@ -390,6 +406,21 @@ status_t SensorService::dump(int fd, const Vector<String16>& args) {
             result.append("Fusion States:\n");
             SensorFusion::getInstance().dump(result);
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                result.appendFormat("%.4f mA | ", s.getPowerUsage());
+
+                int bufIndex = mLastEventSeen.indexOfKey(s.getHandle());
+                if (bufIndex >= 0) {
+                    const CircularBuffer* buf = mLastEventSeen.valueAt(bufIndex);
+                    if (buf != NULL && s.getRequiredPermission().isEmpty()) {
+                        buf->printBuffer(result);
+                    } else {
+                        result.append("last=<> \n");
+                    }
+=======
+>>>>>>> CyanogenMod-cm-14.1
             result.append("Recent Sensor events:\n");
             for (auto&& i : mRecentEvent) {
                 sp<SensorInterface> s = mSensors.getInterface(i.first);
@@ -398,6 +429,10 @@ status_t SensorService::dump(int fd, const Vector<String16>& args) {
                     // if there is events and sensor does not need special permission.
                     result.appendFormat("%s: ", s->getSensor().getName().string());
                     result.append(i.second->dump().c_str());
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
                 }
             }
 

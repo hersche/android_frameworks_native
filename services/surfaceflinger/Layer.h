@@ -99,12 +99,26 @@ public:
     struct Geometry {
         uint32_t w;
         uint32_t h;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        bool isPositionPending;
+        Rect crop;
+        inline bool operator ==(const Geometry& rhs) const {
+            return (w == rhs.w && h == rhs.h && crop == rhs.crop && x == rhs.x && y == rhs.y
+                && isPositionPending == rhs.isPositionPending);
+=======
+>>>>>>> CyanogenMod-cm-14.1
         Transform transform;
 
         inline bool operator ==(const Geometry& rhs) const {
             return (w == rhs.w && h == rhs.h) &&
                     (transform.tx() == rhs.transform.tx()) &&
                     (transform.ty() == rhs.transform.ty());
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         }
         inline bool operator !=(const Geometry& rhs) const {
             return !operator ==(rhs);
@@ -117,9 +131,18 @@ public:
         uint32_t z;
         uint32_t layerStack;
         uint8_t blur;
+<<<<<<< HEAD
 #ifdef USE_HWC2
         float alpha;
 #else
+=======
+<<<<<<< HEAD
+=======
+#ifdef USE_HWC2
+        float alpha;
+#else
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         uint8_t alpha;
 #endif
         uint8_t flags;
@@ -188,8 +211,22 @@ public:
     uint32_t getTransactionFlags(uint32_t flags);
     uint32_t setTransactionFlags(uint32_t flags);
 
+<<<<<<< HEAD
     virtual void computeGeometry(const sp<const DisplayDevice>& hw, Mesh& mesh,
             bool useIdentityTransform) const;
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+    virtual void computeGeometry(const sp<const DisplayDevice>& hw, Mesh& mesh,
+            bool useIdentityTransform) const;
+#else
+    void computeGeometry(const sp<const DisplayDevice>& hw, Mesh& mesh,
+=======
+    virtual void computeGeometry(const sp<const DisplayDevice>& hw, Mesh& mesh,
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+            bool useIdentityTransform) const;
+#endif
+>>>>>>> CyanogenMod-cm-14.1
     Rect computeBounds(const Region& activeTransparentRegion) const;
     Rect computeBounds() const;
 
@@ -359,12 +396,27 @@ public:
 
     // Updates the transform hint in our SurfaceFlingerConsumer to match
     // the current orientation of the display device.
+<<<<<<< HEAD
     void updateTransformHint(const sp<const DisplayDevice>& hw);
+=======
+<<<<<<< HEAD
+    void updateTransformHint(const sp<const DisplayDevice>& hw) ;
+=======
+    void updateTransformHint(const sp<const DisplayDevice>& hw);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     /* ------------------------------------------------------------------------
      * Extensions
      */
+<<<<<<< HEAD
 #ifndef USE_HWC2
+=======
+<<<<<<< HEAD
+=======
+#ifndef USE_HWC2
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     virtual bool isExtOnly() const { return false; }
     virtual bool isIntOnly() const { return false; }
     virtual bool isSecureDisplay() const { return false; }
@@ -374,10 +426,21 @@ public:
                              const State& /*state*/) { }
     virtual void setAcquiredFenceIfBlit(int& /*fenceFd */,
                        HWComposer::HWCLayerInterface& /*layer */) { }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    virtual bool canAllowGPUForProtected() const { return false; }
+
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #endif
     virtual bool canAllowGPUForProtected() const { return false; }
     virtual void handleOpenGLDraw(const sp<const DisplayDevice>& /*hw*/,
             Mesh& mesh) const;
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     /*
      * returns the rectangle that crops the content of the layer and scales it
@@ -438,6 +501,10 @@ public:
 
     /* always call base class first */
     void dump(String8& result, Colorizer& colorizer) const;
+#ifdef USE_HWC2
+    static void miniDumpHeader(String8& result);
+    void miniDump(String8& result, int32_t hwcId) const;
+#endif
     void dumpFrameStats(String8& result) const;
     void clearFrameStats();
     void logFrameStats();
@@ -496,8 +563,21 @@ private:
     // drawing
     void clearWithOpenGL(const sp<const DisplayDevice>& hw, const Region& clip,
             float r, float g, float b, float alpha) const;
+<<<<<<< HEAD
     virtual void drawWithOpenGL(const sp<const DisplayDevice>& hw, const Region& clip,
             bool useIdentityTransform) const;
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+    virtual void drawWithOpenGL(const sp<const DisplayDevice>& hw, const Region& clip,
+            bool useIdentityTransform) const;
+#else
+    void drawWithOpenGL(const sp<const DisplayDevice>& hw, const Region& clip,
+=======
+    virtual void drawWithOpenGL(const sp<const DisplayDevice>& hw, const Region& clip,
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+            bool useIdentityTransform) const;
+>>>>>>> CyanogenMod-cm-14.1
 
     // Temporary - Used only for LEGACY camera mode.
     uint32_t getProducerStickyTransform() const;
@@ -625,6 +705,8 @@ private:
         bool forceClientComposition;
         HWC2::Composition compositionType;
         bool clearClientTarget;
+        Rect displayFrame;
+        FloatRect sourceCrop;
     };
     std::unordered_map<int32_t, HWCInfo> mHwcLayers;
 #else
@@ -649,9 +731,18 @@ private:
     Vector<BufferItem> mQueueItems;
     std::atomic<uint64_t> mLastFrameNumberReceived;
     bool mUpdateTexImageFailed; // This is only modified from the main thread
+<<<<<<< HEAD
 
     bool mAutoRefresh;
     bool mFreezePositionUpdates;
+=======
+<<<<<<< HEAD
+=======
+
+    bool mAutoRefresh;
+    bool mFreezePositionUpdates;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     uint32_t mTransformHint;
 };
 

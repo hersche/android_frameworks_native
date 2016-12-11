@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 // #define LOG_NDEBUG 0
+=======
+<<<<<<< HEAD
+//#define LOG_NDEBUG 0
+=======
+// #define LOG_NDEBUG 0
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
 #include <stdint.h>
@@ -316,9 +324,26 @@ void SurfaceFlinger::bootFinished()
     // can choose where to stop the animation.
     property_set("service.bootanim.exit", "1");
 
+<<<<<<< HEAD
     const int LOGTAG_SF_STOP_BOOTANIM = 60110;
     LOG_EVENT_LONG(LOGTAG_SF_STOP_BOOTANIM,
                    ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
+=======
+#ifdef USES_HWC_SERVICES
+    sp<IServiceManager> sm = defaultServiceManager();
+    sp<android::IExynosHWCService> hwc =
+        interface_cast<android::IExynosHWCService>(sm->getService(String16("Exynos.HWCService")));
+    ALOGD("boot finished. Inform HWC");
+    hwc->setBootFinished();
+#endif
+<<<<<<< HEAD
+=======
+
+    const int LOGTAG_SF_STOP_BOOTANIM = 60110;
+    LOG_EVENT_LONG(LOGTAG_SF_STOP_BOOTANIM,
+                   ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 void SurfaceFlinger::deleteTextureAsync(uint32_t texture) {
@@ -475,11 +500,36 @@ void SurfaceFlinger::init() {
 
         // set SFEventThread to SCHED_FIFO to minimize jitter
         struct sched_param param = {0};
-        param.sched_priority = 1;
+        param.sched_priority = 2;
         if (sched_setscheduler(mSFEventThread->getTid(), SCHED_FIFO, &param) != 0) {
             ALOGE("Couldn't set SCHED_FIFO for SFEventThread");
         }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    // start the EventThread
+    if (vsyncPhaseOffsetNs != sfVsyncPhaseOffsetNs) {
+        sp<VSyncSource> vsyncSrc = new DispSyncSource(&mPrimaryDispSync,
+                vsyncPhaseOffsetNs, true, "app");
+        mEventThread = new EventThread(vsyncSrc);
+        sp<VSyncSource> sfVsyncSrc = new DispSyncSource(&mPrimaryDispSync,
+                sfVsyncPhaseOffsetNs, true, "sf");
+        mSFEventThread = new EventThread(sfVsyncSrc);
+        mEventQueue.setEventThread(mSFEventThread);
+    } else {
+        sp<VSyncSource> vsyncSrc = new DispSyncSource(&mPrimaryDispSync,
+                vsyncPhaseOffsetNs, true, "sf-app");
+        mEventThread = new EventThread(vsyncSrc);
+        mEventQueue.setEventThread(mEventThread);
+    }
+
+    // Initialize the H/W composer object.  There may or may not be an
+    // actual hardware composer underneath.
+    mHwc = DisplayUtils::getInstance()->getHWCInstance(this,
+            *static_cast<HWComposer::EventHandler *>(this));
+=======
+>>>>>>> CyanogenMod-cm-14.1
         // Get a RenderEngine for the given display / config (can't fail)
         mRenderEngine = RenderEngine::create(mEGLDisplay,
                 HAL_PIXEL_FORMAT_RGBA_8888);
@@ -490,6 +540,10 @@ void SurfaceFlinger::init() {
     // initialize the primary display.
     mHwc = new HWComposer(this);
     mHwc->setEventHandler(static_cast<HWComposer::EventHandler*>(this));
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     Mutex::Autolock _l(mStateLock);
 
@@ -499,13 +553,74 @@ void SurfaceFlinger::init() {
     LOG_ALWAYS_FATAL_IF(mEGLContext == EGL_NO_CONTEXT,
             "couldn't create EGLContext");
 
+<<<<<<< HEAD
     // make the GLContext current so that we can create textures when creating
     // Layers (which may happens before we render something)
+=======
+<<<<<<< HEAD
+    // initialize our non-virtual displays
+    for (size_t i=0 ; i<DisplayDevice::NUM_BUILTIN_DISPLAY_TYPES ; i++) {
+        DisplayDevice::DisplayType type((DisplayDevice::DisplayType)i);
+        // set-up the displays that are already connected
+        if (mHwc->isConnected(i) || type==DisplayDevice::DISPLAY_PRIMARY) {
+            // All non-virtual displays are currently considered secure.
+            bool isSecure = true;
+            createBuiltinDisplayLocked(type);
+            wp<IBinder> token = mBuiltinDisplays[i];
+
+            sp<IGraphicBufferProducer> producer;
+            sp<IGraphicBufferConsumer> consumer;
+            BufferQueue::createBufferQueue(&producer, &consumer,
+                    new GraphicBufferAlloc());
+
+            sp<FramebufferSurface> fbs = new FramebufferSurface(*mHwc, i,
+                    consumer);
+            int32_t hwcId = allocateHwcDisplayId(type);
+            sp<DisplayDevice> hw = new DisplayDevice(this,
+                    type, hwcId, mHwc->getFormat(hwcId), isSecure, token,
+                    fbs, producer,
+                    mRenderEngine->getEGLConfig());
+            if (i > DisplayDevice::DISPLAY_PRIMARY) {
+                // FIXME: currently we don't get blank/unblank requests
+                // for displays other than the main display, so we always
+                // assume a connected display is unblanked.
+                ALOGD("marking display %zu as acquired/unblanked", i);
+                hw->setPowerMode(HWC_POWER_MODE_NORMAL);
+            }
+            // When a non-virtual display device is added at boot time,
+            // update the active config by querying HWC otherwise the
+            // default config (config 0) will be used.
+            int activeConfig = mHwc->getActiveConfig(hwcId);
+            if (activeConfig >= 0) {
+                hw->setActiveConfig(activeConfig);
+            }
+            mDisplays.add(token, hw);
+        }
+    }
+
+    // make the GLContext current so that we can create textures when creating Layers
+    // (which may happens before we render something)
+=======
+    // make the GLContext current so that we can create textures when creating
+    // Layers (which may happens before we render something)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     getDefaultDisplayDevice()->makeCurrent(mEGLDisplay, mEGLContext);
 
     mEventControlThread = new EventControlThread(this);
     mEventControlThread->run("EventControl", PRIORITY_URGENT_DISPLAY);
     android_set_rt_ioprio(mEventControlThread->getTid(), 1);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+    // set a fake vsync period if there is no HWComposer
+    if (mHwc->initCheck() != NO_ERROR) {
+        mPrimaryDispSync.setPeriod(16666667);
+    }
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     // initialize our drawing state
     mDrawingState = mCurrentState;
@@ -620,18 +735,43 @@ status_t SurfaceFlinger::getDisplayConfigs(const sp<IBinder>& display,
         property_get("ro.sf.hwrotation", value, "0");
         int additionalRot = atoi(value) / 90;
         if ((type == DisplayDevice::DISPLAY_PRIMARY) && (additionalRot & DisplayState::eOrientationSwapMask)) {
+<<<<<<< HEAD
             info.h = hwConfig->getWidth();
             info.w = hwConfig->getHeight();
+=======
+<<<<<<< HEAD
+            info.h = hwConfig.width;
+            info.w = hwConfig.height;
+=======
+            info.h = hwConfig->getWidth();
+            info.w = hwConfig->getHeight();
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             info.xdpi = ydpi;
             info.ydpi = xdpi;
         }
         else {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+            info.w = hwConfig.width;
+            info.h = hwConfig.height;
+            info.xdpi = xdpi;
+            info.ydpi = ydpi;
+        }
+        info.fps = float(1e9 / hwConfig.refresh);
+=======
+>>>>>>> CyanogenMod-cm-14.1
             info.w = hwConfig->getWidth();
             info.h = hwConfig->getHeight();
             info.xdpi = xdpi;
             info.ydpi = ydpi;
         }
         info.fps = 1e9 / hwConfig->getVsyncPeriod();
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         info.appVsyncOffset = VSYNC_EVENT_PHASE_OFFSET_NS;
 
         // This is how far in advance a buffer must be queued for
@@ -1072,6 +1212,26 @@ void SurfaceFlinger::handleMessageRefresh() {
 
     nsecs_t refreshStartTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    if (CC_UNLIKELY(mDropMissedFrames && frameMissed)) {
+        // Latch buffers, but don't send anything to HWC, then signal another
+        // wakeup for the next vsync
+        preComposition();
+        repaintEverything();
+    } else {
+        preComposition();
+        rebuildLayerStacks();
+        setUpHWComposer();
+        doDebugFlashRegions();
+        doComposition();
+        postComposition();
+#ifdef USES_HWC_SERVICES
+        notifyPSRExit = true;
+#endif
+=======
+>>>>>>> CyanogenMod-cm-14.1
     preComposition();
     rebuildLayerStacks();
     setUpHWComposer();
@@ -1086,6 +1246,10 @@ void SurfaceFlinger::handleMessageRefresh() {
         const sp<DisplayDevice>& displayDevice = mDisplays[displayId];
         mHadClientComposition = mHadClientComposition ||
                 mHwc->hasClientComposition(displayDevice->getHwcDisplayId());
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 
     // Release any buffers which were replaced this frame
@@ -1229,9 +1393,19 @@ void SurfaceFlinger::postComposition(nsecs_t refreshStartTime)
 }
 
 void SurfaceFlinger::rebuildLayerStacks() {
+<<<<<<< HEAD
     ATRACE_CALL();
     ALOGV("rebuildLayerStacks");
 
+=======
+<<<<<<< HEAD
+    updateExtendedMode();
+=======
+    ATRACE_CALL();
+    ALOGV("rebuildLayerStacks");
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     // rebuild the visible layer list per screen
     if (CC_UNLIKELY(mVisibleRegionsDirty)) {
         ATRACE_CALL();
@@ -1242,6 +1416,18 @@ void SurfaceFlinger::rebuildLayerStacks() {
         for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
             Region opaqueRegion;
             Region dirtyRegion;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+            Vector< sp<Layer> > layersSortedByZ;
+            const sp<DisplayDevice>& hw(mDisplays[dpy]);
+            const Transform& tr(hw->getTransform());
+            const Rect bounds(hw->getBounds());
+            if (hw->isDisplayOn()) {
+                computeVisibleRegions(hw->getHwcDisplayId(), layers,
+                        hw->getLayerStack(), dirtyRegion, opaqueRegion);
+=======
+>>>>>>> CyanogenMod-cm-14.1
             Vector<sp<Layer>> layersSortedByZ;
             const sp<DisplayDevice>& displayDevice(mDisplays[dpy]);
             const Transform& tr(displayDevice->getTransform());
@@ -1250,12 +1436,25 @@ void SurfaceFlinger::rebuildLayerStacks() {
                 SurfaceFlinger::computeVisibleRegions(displayDevice->getHwcDisplayId(), layers,
                         displayDevice->getLayerStack(), dirtyRegion,
                         opaqueRegion);
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
                 const size_t count = layers.size();
                 for (size_t i=0 ; i<count ; i++) {
                     const sp<Layer>& layer(layers[i]);
+<<<<<<< HEAD
                     const Layer::State& s(layer->getDrawingState());
                     if (s.layerStack == displayDevice->getLayerStack()) {
+=======
+<<<<<<< HEAD
+                    {
+=======
+                    const Layer::State& s(layer->getDrawingState());
+                    if (s.layerStack == displayDevice->getLayerStack()) {
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
                         Region drawRegion(tr.transform(
                                 layer->visibleNonTransparentRegion));
                         drawRegion.andSelf(bounds);
@@ -1312,6 +1511,32 @@ void SurfaceFlinger::setUpHWComposer() {
         }
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    HWComposer& hwc(getHwComposer());
+    if (hwc.initCheck() == NO_ERROR) {
+        // build the h/w work list
+        if (CC_UNLIKELY(mHwWorkListDirty)) {
+            mHwWorkListDirty = false;
+            for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+                sp<const DisplayDevice> hw(mDisplays[dpy]);
+                const int32_t id = hw->getHwcDisplayId();
+                if (id >= 0) {
+                    const Vector< sp<Layer> >& currentLayers(
+                        hw->getVisibleLayersSortedByZ());
+                    const size_t count = currentLayers.size();
+                    if (hwc.createWorkList(id, count) == NO_ERROR) {
+                        HWComposer::LayerListIterator cur = hwc.begin(id);
+                        const HWComposer::LayerListIterator end = hwc.end(id);
+                        for (size_t i=0 ; cur!=end && i<count ; ++i, ++cur) {
+                            const sp<Layer>& layer(currentLayers[i]);
+                            layer->setGeometry(hw, *cur);
+                            if (mDebugDisableHWC || mDebugRegion || mDaltonize || mHasColorMatrix || mHasSecondaryColorMatrix) {
+                                cur->setSkip(true);
+                            }
+=======
+>>>>>>> CyanogenMod-cm-14.1
     // build the h/w work list
     if (CC_UNLIKELY(mGeometryInvalid)) {
         mGeometryInvalid = false;
@@ -1331,12 +1556,48 @@ void SurfaceFlinger::setUpHWComposer() {
                             layer->forceClientComposition(hwcId);
                             foundLayerWithoutHwc = true;
                             continue;
+<<<<<<< HEAD
                         }
                     }
 
                     layer->setGeometry(displayDevice);
                     if (mDebugDisableHWC || mDebugRegion) {
                         layer->forceClientComposition(hwcId);
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+                        }
+                    }
+
+<<<<<<< HEAD
+        // set the per-frame data
+        for (size_t dpy=0 ; dpy<mDisplays.size() ; dpy++) {
+            sp<const DisplayDevice> hw(mDisplays[dpy]);
+            const int32_t id = hw->getHwcDisplayId();
+            if (id >= 0) {
+                bool freezeSurfacePresent = false;
+                isfreezeSurfacePresent(freezeSurfacePresent, hw, id);
+                const Vector< sp<Layer> >& currentLayers(
+                    hw->getVisibleLayersSortedByZ());
+                const size_t count = currentLayers.size();
+                HWComposer::LayerListIterator cur = hwc.begin(id);
+                const HWComposer::LayerListIterator end = hwc.end(id);
+                for (size_t i=0 ; cur!=end && i<count ; ++i, ++cur) {
+                    /*
+                     * update the per-frame h/w composer data for each layer
+                     * and build the transparent region of the FB
+                     */
+                    const sp<Layer>& layer(currentLayers[i]);
+                    layer->setPerFrameData(hw, *cur);
+                    setOrientationEventControl(freezeSurfacePresent,id);
+                    if(!strncmp(layer->getName(), "SurfaceView",
+                                11)) {
+                        lastSurfaceViewLayer = layer;
+=======
+                    layer->setGeometry(displayDevice);
+                    if (mDebugDisableHWC || mDebugRegion) {
+                        layer->forceClientComposition(hwcId);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
                     }
                 }
             }
@@ -1363,7 +1624,18 @@ void SurfaceFlinger::setUpHWComposer() {
         }
     }
 
+<<<<<<< HEAD
     mPreviousColorMatrix = colorMatrix;
+=======
+<<<<<<< HEAD
+        dumpDrawCycle(true);
+
+        status_t err = hwc.prepare();
+        ALOGE_IF(err, "HWComposer::prepare failed (%s)", strerror(-err));
+=======
+    mPreviousColorMatrix = colorMatrix;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     for (size_t displayId = 0; displayId < mDisplays.size(); ++displayId) {
         auto& displayDevice = mDisplays[displayId];
@@ -1605,6 +1877,39 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
                         // etc.) but no internal state (i.e. a DisplayDevice).
                         if (state.surface != NULL) {
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+                            int width = 0;
+                            DisplayUtils* displayUtils = DisplayUtils::getInstance();
+                            int status = state.surface->query(
+                                    NATIVE_WINDOW_WIDTH, &width);
+                            ALOGE_IF(status != NO_ERROR,
+                                    "Unable to query width (%d)", status);
+                            int height = 0;
+                            status = state.surface->query(
+                                    NATIVE_WINDOW_HEIGHT, &height);
+                            ALOGE_IF(status != NO_ERROR,
+                                    "Unable to query height (%d)", status);
+                            if (MAX_VIRTUAL_DISPLAY_DIMENSION == 0 ||
+                                    (width <= MAX_VIRTUAL_DISPLAY_DIMENSION &&
+                                     height <= MAX_VIRTUAL_DISPLAY_DIMENSION)) {
+                                int usage = 0;
+                                status = state.surface->query(
+                                    NATIVE_WINDOW_CONSUMER_USAGE_BITS, &usage);
+                                ALOGW_IF(status != NO_ERROR,
+                                        "Unable to query usage (%d)", status);
+                                if ( (status == NO_ERROR) &&
+                                     displayUtils->canAllocateHwcDisplayIdForVDS(usage)) {
+                                    hwcDisplayId = allocateHwcDisplayId(state.type);
+                                }
+                            }
+
+                            displayUtils->initVDSInstance(mHwc, hwcDisplayId, state.surface,
+                                    dispSurface, producer, bqProducer, bqConsumer,
+                                    state.displayName, state.isSecure, state.type);
+=======
+>>>>>>> CyanogenMod-cm-14.1
                             if (mUseHwcVirtualDisplays) {
                                 int width = 0;
                                 int status = state.surface->query(
@@ -1634,6 +1939,10 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
                                     new VirtualDisplaySurface(*mHwc,
                                             hwcId, state.surface, bqProducer,
                                             bqConsumer, state.displayName);
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
                             dispSurface = vds;
                             producer = vds;
@@ -1807,7 +2116,15 @@ void SurfaceFlinger::commitTransaction()
     mTransactionCV.broadcast();
 }
 
+<<<<<<< HEAD
 void SurfaceFlinger::computeVisibleRegions(size_t /* dpy */,
+=======
+<<<<<<< HEAD
+void SurfaceFlinger::computeVisibleRegions(size_t dpy,
+=======
+void SurfaceFlinger::computeVisibleRegions(size_t /* dpy */,
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         const LayerVector& currentLayers, uint32_t layerStack,
         Region& outDirtyRegion, Region& outOpaqueRegion)
 {
@@ -2051,7 +2368,29 @@ void SurfaceFlinger::doDisplayComposition(const sp<const DisplayDevice>& hw,
         }
     }
 
+<<<<<<< HEAD
     if (!doComposeSurfaces(hw, dirtyRegion)) return;
+=======
+<<<<<<< HEAD
+    if (CC_LIKELY(!mDaltonize && !mHasColorMatrix && !mHasSecondaryColorMatrix)) {
+        if (!doComposeSurfaces(hw, dirtyRegion)) return;
+    } else {
+        RenderEngine& engine(getRenderEngine());
+        mat4 colorMatrix = mColorMatrix;
+        if (mHasSecondaryColorMatrix) {
+            colorMatrix = mHasColorMatrix ? (colorMatrix * mSecondaryColorMatrix) : mSecondaryColorMatrix;
+        }
+        if (mDaltonize) {
+            colorMatrix = colorMatrix * mDaltonizer();
+        }
+        mat4 oldMatrix = engine.setupColorTransform(colorMatrix);
+        doComposeSurfaces(hw, dirtyRegion);
+        engine.setupColorTransform(oldMatrix);
+    }
+=======
+    if (!doComposeSurfaces(hw, dirtyRegion)) return;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     // update the swap region and clear the dirty region
     hw->swapRegion.orSelf(dirtyRegion);
@@ -2090,9 +2429,25 @@ bool SurfaceFlinger::doComposeSurfaces(
         }
 
         // Never touch the framebuffer if we don't have any framebuffer layers
+<<<<<<< HEAD
         const bool hasDeviceComposition = mHwc->hasDeviceComposition(hwcId) ||
                 isS3DLayerPresent(displayDevice);
         if (hasDeviceComposition) {
+=======
+<<<<<<< HEAD
+#if defined(QTI_BSP) && defined(SDM_TARGET)
+        const bool hasHwcComposition = hwc.hasHwcComposition(id) |
+            (reinterpret_cast<ExHWComposer*>(&hwc))->getS3DFlag(id);
+#else
+        const bool hasHwcComposition = hwc.hasHwcComposition(id);
+#endif
+        if (hasHwcComposition) {
+=======
+        const bool hasDeviceComposition = mHwc->hasDeviceComposition(hwcId) ||
+                isS3DLayerPresent(displayDevice);
+        if (hasDeviceComposition) {
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             // when using overlays, we assume a fully transparent framebuffer
             // NOTE: we could reduce how much we need to clear, for instance
             // remove where there are opaque FB layers. however, on some
@@ -2117,7 +2472,15 @@ bool SurfaceFlinger::doComposeSurfaces(
             // screen is already cleared here
             if (!region.isEmpty()) {
                 // can happen with SurfaceView
+<<<<<<< HEAD
                 drawWormhole(displayDevice, region);
+=======
+<<<<<<< HEAD
+                drawWormHoleIfRequired(cur, end, hw, region);
+=======
+                drawWormhole(displayDevice, region);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             }
         }
 
@@ -3127,6 +3490,26 @@ void SurfaceFlinger::dumpAllLocked(const Vector<String16>& args, size_t& index,
      * VSYNC state
      */
     mEventThread->dump(result);
+    result.append("\n");
+
+    /*
+     * HWC layer minidump
+     */
+    for (size_t d = 0; d < mDisplays.size(); d++) {
+        const sp<const DisplayDevice>& displayDevice(mDisplays[d]);
+        int32_t hwcId = displayDevice->getHwcDisplayId();
+        if (hwcId == DisplayDevice::DISPLAY_ID_INVALID) {
+            continue;
+        }
+
+        result.appendFormat("Display %d HWC layers:\n", hwcId);
+        Layer::miniDumpHeader(result);
+        for (size_t l = 0; l < count; l++) {
+            const sp<Layer>& layer(currentLayers[l]);
+            layer->miniDump(result, hwcId);
+        }
+        result.append("\n");
+    }
 
     /*
      * Dump HWComposer state
@@ -3134,9 +3517,23 @@ void SurfaceFlinger::dumpAllLocked(const Vector<String16>& args, size_t& index,
     colorizer.bold(result);
     result.append("h/w composer state:\n");
     colorizer.reset(result);
+<<<<<<< HEAD
     bool hwcDisabled = mDebugDisableHWC || mDebugRegion;
     result.appendFormat("  h/w composer %s\n",
             hwcDisabled ? "disabled" : "enabled");
+=======
+<<<<<<< HEAD
+    result.appendFormat("  h/w composer %s and %s\n",
+            hwc.initCheck()==NO_ERROR ? "present" : "not present",
+                    (mDebugDisableHWC || mDebugRegion || mDaltonize
+                            || mHasColorMatrix
+                            || mHasSecondaryColorMatrix) ? "disabled" : "enabled");
+=======
+    bool hwcDisabled = mDebugDisableHWC || mDebugRegion;
+    result.appendFormat("  h/w composer %s\n",
+            hwcDisabled ? "disabled" : "enabled");
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     hwc.dump(result);
 
     /*
@@ -3352,11 +3749,42 @@ status_t SurfaceFlinger::onTransact(
                 mSFEventThread->setPhaseOffset(static_cast<nsecs_t>(n));
                 return NO_ERROR;
             }
+<<<<<<< HEAD
+=======
+            case 1030: {
+                // apply a secondary color matrix
+                // this will be combined with any other transformations
+                n = data.readInt32();
+                mHasSecondaryColorMatrix = n ? 1 : 0;
+                if (n) {
+                    // color matrix is sent as mat3 matrix followed by vec3
+                    // offset, then packed into a mat4 where the last row is
+                    // the offset and extra values are 0
+                    for (size_t i = 0 ; i < 4; i++) {
+                      for (size_t j = 0; j < 4; j++) {
+                          mSecondaryColorMatrix[i][j] = data.readFloat();
+                      }
+                    }
+                } else {
+                    mSecondaryColorMatrix = mat4();
+                }
+                invalidateHwcGeometry();
+                repaintEverything();
+                return NO_ERROR;
+            }
+<<<<<<< HEAD
+
+=======
+>>>>>>> CyanogenMod-cm-14.1
             case 1021: { // Disable HWC virtual displays
                 n = data.readInt32();
                 mUseHwcVirtualDisplays = !n;
                 return NO_ERROR;
             }
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         }
     }
     return err;
@@ -3541,16 +3969,39 @@ status_t SurfaceFlinger::captureScreen(const sp<IBinder>& display,
                 const sp<IGraphicBufferProducer>& producer,
                 Rect sourceCrop, uint32_t reqWidth, uint32_t reqHeight,
                 uint32_t minLayerZ, uint32_t maxLayerZ,
+<<<<<<< HEAD
                 bool useIdentityTransform,
                 Transform::orientation_flags rotation,
                 bool isLocalScreenshot, bool useReadPixels)
+=======
+<<<<<<< HEAD
+                bool useIdentityTransform, Transform::orientation_flags rotation,
+                bool useReadPixels)
+=======
+                bool useIdentityTransform,
+                Transform::orientation_flags rotation,
+                bool isLocalScreenshot, bool useReadPixels)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             : flinger(flinger), display(display), producer(producer),
               sourceCrop(sourceCrop), reqWidth(reqWidth), reqHeight(reqHeight),
               minLayerZ(minLayerZ), maxLayerZ(maxLayerZ),
               useIdentityTransform(useIdentityTransform),
+<<<<<<< HEAD
               rotation(rotation), result(PERMISSION_DENIED),
               isLocalScreenshot(isLocalScreenshot),
               useReadPixels(useReadPixels)
+=======
+<<<<<<< HEAD
+              rotation(rotation),
+              useReadPixels(useReadPixels),
+              result(PERMISSION_DENIED)
+=======
+              rotation(rotation), result(PERMISSION_DENIED),
+              isLocalScreenshot(isLocalScreenshot),
+              useReadPixels(useReadPixels)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         {
         }
         status_t getResult() const {
@@ -3562,8 +4013,17 @@ status_t SurfaceFlinger::captureScreen(const sp<IBinder>& display,
             bool useReadPixels = this->useReadPixels && !flinger->mGpuToCpuSupported;
             result = flinger->captureScreenImplLocked(hw, producer,
                     sourceCrop, reqWidth, reqHeight, minLayerZ, maxLayerZ,
+<<<<<<< HEAD
                     useIdentityTransform, rotation, isLocalScreenshot,
                     useReadPixels);
+=======
+<<<<<<< HEAD
+                    useIdentityTransform, rotation, useReadPixels);
+=======
+                    useIdentityTransform, rotation, isLocalScreenshot,
+                    useReadPixels);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             static_cast<GraphicProducerWrapper*>(IInterface::asBinder(producer).get())->exit(result);
             return true;
         }
@@ -3579,8 +4039,17 @@ status_t SurfaceFlinger::captureScreen(const sp<IBinder>& display,
     sp<MessageBase> msg = new MessageCaptureScreen(this,
             display, IGraphicBufferProducer::asInterface( wrapper ),
             sourceCrop, reqWidth, reqHeight, minLayerZ, maxLayerZ,
+<<<<<<< HEAD
             useIdentityTransform, rotationFlags, isLocalScreenshot,
             useReadPixels);
+=======
+<<<<<<< HEAD
+            useIdentityTransform, rotationFlags, useReadPixels);
+=======
+            useIdentityTransform, rotationFlags, isLocalScreenshot,
+            useReadPixels);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     status_t res = postMessageAsync(msg);
     if (res == NO_ERROR) {
@@ -3663,7 +4132,15 @@ status_t SurfaceFlinger::captureScreenImplLocked(
         Rect sourceCrop, uint32_t reqWidth, uint32_t reqHeight,
         uint32_t minLayerZ, uint32_t maxLayerZ,
         bool useIdentityTransform, Transform::orientation_flags rotation,
+<<<<<<< HEAD
         bool isLocalScreenshot, bool useReadPixels)
+=======
+<<<<<<< HEAD
+        bool useReadPixels)
+=======
+        bool isLocalScreenshot, bool useReadPixels)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 {
     ATRACE_CALL();
 
@@ -3861,9 +4338,54 @@ void SurfaceFlinger::checkScreenshot(size_t w, size_t s, size_t h, void const* v
     }
 }
 
+<<<<<<< HEAD
 bool SurfaceFlinger::getFrameTimestamps(const Layer& layer,
         uint64_t frameNumber, FrameTimestamps* outTimestamps) {
     return mFenceTracker.getFrameTimestamps(layer, frameNumber, outTimestamps);
+=======
+<<<<<<< HEAD
+/* ------------------------------------------------------------------------
+ * Extensions
+ */
+
+bool SurfaceFlinger::updateLayerVisibleNonTransparentRegion(const int& /*dpy*/,
+        const sp<Layer>& layer, bool& /*bIgnoreLayers*/, int& /*indexLOI*/,
+        uint32_t layerStack, const int& /*i*/) {
+
+    const Layer::State& s(layer->getDrawingState());
+
+    // only consider the layers on the given layer stack
+    if (s.layerStack != layerStack) {
+        /* set the visible region as empty since we have removed the
+         * layerstack check in rebuildLayerStack() function
+         */
+        Region visibleNonTransRegion;
+        visibleNonTransRegion.set(Rect(0,0));
+        layer->setVisibleNonTransparentRegion(visibleNonTransRegion);
+
+        return true;
+    }
+
+    return false;
+}
+
+bool SurfaceFlinger::canDrawLayerinScreenShot(
+        const sp<const DisplayDevice>& /*hw*/,
+        const sp<Layer>& layer) {
+    return layer->isVisible();
+}
+
+void SurfaceFlinger::drawWormHoleIfRequired(HWComposer::LayerListIterator& /*cur*/,
+        const HWComposer::LayerListIterator& /*end*/,
+        const sp<const DisplayDevice>& hw,
+        const Region& region) {
+    drawWormhole(hw, region);
+=======
+bool SurfaceFlinger::getFrameTimestamps(const Layer& layer,
+        uint64_t frameNumber, FrameTimestamps* outTimestamps) {
+    return mFenceTracker.getFrameTimestamps(layer, frameNumber, outTimestamps);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 // ---------------------------------------------------------------------------

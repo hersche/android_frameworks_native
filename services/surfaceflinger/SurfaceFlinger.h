@@ -62,9 +62,18 @@
 
 #include "FrameRateHelper.h"
 
+<<<<<<< HEAD
 #include <map>
 #include <string>
 
+=======
+<<<<<<< HEAD
+=======
+#include <map>
+#include <string>
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 namespace android {
 
 // ---------------------------------------------------------------------------
@@ -157,6 +166,15 @@ private:
     friend class DisplayEventConnection;
     friend class Layer;
     friend class LayerDim;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+    friend class ExLayer;
+#endif
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     friend class MonitoredProducer;
     friend class LayerBlur;
 
@@ -271,7 +289,14 @@ private:
                      bool& /*bIgnoreLayers*/,
                      int& /*indexLOI*/) { }
 
+<<<<<<< HEAD
 #ifndef USE_HWC2
+=======
+<<<<<<< HEAD
+=======
+#ifndef USE_HWC2
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     virtual bool updateLayerVisibleNonTransparentRegion(
                      const int& dpy, const sp<Layer>& layer,
                      bool& bIgnoreLayers, int& indexLOI,
@@ -299,9 +324,18 @@ private:
         const HWComposer::LayerListIterator &end,
         const sp<const DisplayDevice>& hw,
         const Region& region);
+<<<<<<< HEAD
 #endif
     virtual bool isS3DLayerPresent(const sp<const DisplayDevice>& /*hw*/)
         { return false; };
+=======
+<<<<<<< HEAD
+=======
+#endif
+    virtual bool isS3DLayerPresent(const sp<const DisplayDevice>& /*hw*/)
+        { return false; };
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     /* ------------------------------------------------------------------------
      * Message handling
      */
@@ -405,7 +439,15 @@ private:
             Rect sourceCrop, uint32_t reqWidth, uint32_t reqHeight,
             uint32_t minLayerZ, uint32_t maxLayerZ,
             bool useIdentityTransform, Transform::orientation_flags rotation,
+<<<<<<< HEAD
             bool isLocalScreenshot, bool useReadPixels);
+=======
+<<<<<<< HEAD
+            bool useReadPixels);
+=======
+            bool isLocalScreenshot, bool useReadPixels);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     /* ------------------------------------------------------------------------
      * EGL
@@ -510,6 +552,11 @@ private:
 
     void dumpStaticScreenStats(String8& result) const;
     virtual void dumpDrawCycle(bool /* prePrepare */ ) { }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 
     void recordBufferingStats(const char* layerName,
             std::vector<OccupancyTracker::Segment>&& history);
@@ -517,6 +564,10 @@ private:
 
     bool getFrameTimestamps(const Layer& layer, uint64_t frameNumber,
             FrameTimestamps* outTimestamps);
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     /* ------------------------------------------------------------------------
      * Attributes
@@ -622,7 +673,15 @@ private:
     static const size_t NUM_BUCKETS = 8; // < 1-7, 7+
     nsecs_t mFrameBuckets[NUM_BUCKETS];
     nsecs_t mTotalTime;
+<<<<<<< HEAD
     std::atomic<nsecs_t> mLastSwapTime;
+=======
+<<<<<<< HEAD
+    nsecs_t mLastSwapTime;
+=======
+    std::atomic<nsecs_t> mLastSwapTime;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     FrameRateHelper mFrameRateHelper;
 
@@ -634,6 +693,11 @@ private:
      */
     uint32_t mActiveFrameSequence;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
     // Double- vs. triple-buffering stats
     struct BufferingStats {
         BufferingStats()
@@ -656,6 +720,10 @@ private:
     };
     mutable Mutex mBufferingStatsMutex;
     std::unordered_map<std::string, BufferingStats> mBufferingStats;
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 };
 
 }; // namespace android

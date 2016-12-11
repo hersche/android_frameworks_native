@@ -31,6 +31,14 @@
 #include "ExHWComposer.h"
 #ifdef QTI_BSP
 #include <hardware/display_defs.h>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+#include <gralloc_priv.h>
+#include <qdMetaData.h>
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #endif
 
 namespace android {
@@ -74,4 +82,38 @@ bool ExHWComposer::isCompositionTypeBlit(const int32_t compType) const {
     return false;
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+#if defined(QTI_BSP) && defined(SDM_TARGET)
+uint32_t ExHWComposer::getS3DFlag(int disp) const {
+    if (disp < 0) {
+        return 0;
+    }
+
+    if (!mHwc || uint32_t(disp) >= MAX_HWC_DISPLAYS || !mAllocatedDisplayIDs.hasBit(disp))
+        return 0;
+
+    const DisplayData& disp_data(mDisplayData[disp]);
+
+    for (size_t i=0 ; i<disp_data.list->numHwLayers-1; i++) {
+        const hwc_layer_1_t &l = disp_data.list->hwLayers[i];
+        private_handle_t *pvt_handle = static_cast<private_handle_t *>
+                                    (const_cast<native_handle_t*>(l.handle));
+
+        if (pvt_handle != NULL) {
+            struct S3DSFRender_t s3dRender;
+            getMetaData(pvt_handle, GET_S3D_RENDER, &s3dRender);
+            if (s3dRender.DisplayId == static_cast<uint32_t>(disp) && s3dRender.GpuRender) {
+                return s3dRender.GpuS3dFormat;
+            }
+        }
+    }
+    return 0;
+}
+#endif
+
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }; // namespace android

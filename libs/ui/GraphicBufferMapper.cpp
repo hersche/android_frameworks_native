@@ -71,6 +71,7 @@ status_t GraphicBufferMapper::registerBuffer(const GraphicBuffer* buffer)
     return error;
 }
 
+<<<<<<< HEAD
 status_t GraphicBufferMapper::unregisterBuffer(buffer_handle_t handle)
 {
     ATRACE_CALL();
@@ -82,6 +83,9 @@ status_t GraphicBufferMapper::unregisterBuffer(buffer_handle_t handle)
     return error;
 }
 
+=======
+<<<<<<< HEAD
+>>>>>>> CyanogenMod-cm-14.1
 #ifdef MTK_HARDWARE
 extern "C" {
 
@@ -95,6 +99,23 @@ status_t _ZN7android19GraphicBufferMapper4lockEPK13native_handleiRKNS_4RectEPPv(
 
 }
 #endif
+<<<<<<< HEAD
+=======
+status_t GraphicBufferMapper::lock(buffer_handle_t handle,
+        uint32_t usage, const Rect& bounds, void** vaddr)
+=======
+status_t GraphicBufferMapper::unregisterBuffer(buffer_handle_t handle)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+{
+    ATRACE_CALL();
+
+    gralloc1_error_t error = mDevice->release(handle);
+    ALOGW_IF(error != GRALLOC1_ERROR_NONE, "unregisterBuffer(%p): failed %d",
+            handle, error);
+
+    return error;
+}
+>>>>>>> CyanogenMod-cm-14.1
 
 static inline gralloc1_rect_t asGralloc1Rect(const Rect& rect) {
     gralloc1_rect_t outRect{};

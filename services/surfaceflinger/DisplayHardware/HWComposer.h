@@ -104,7 +104,21 @@ public:
     status_t setPowerMode(int32_t displayId, int mode);
 
     // set active config
+<<<<<<< HEAD
     status_t setActiveConfig(int32_t displayId, size_t configId);
+=======
+<<<<<<< HEAD
+    status_t setActiveConfig(int disp, int mode);
+
+    // get active config
+    int getActiveConfig(int disp) const;
+
+    // reset state when an external, non-virtual display is disconnected
+    void disconnectDisplay(int disp);
+=======
+    status_t setActiveConfig(int32_t displayId, size_t configId);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     // Sets a color transform to be applied to the result of composition
     status_t setColorTransform(int32_t displayId, const mat4& transform);
@@ -116,7 +130,25 @@ public:
     bool hasDeviceComposition(int32_t displayId) const;
 
     // does this display have layers handled by GLES
+<<<<<<< HEAD
     bool hasClientComposition(int32_t displayId) const;
+=======
+<<<<<<< HEAD
+    bool hasGlesComposition(int32_t id) const;
+
+    // does this display support dim layer composition
+    bool hasDimComposition() const { return (mDimComp == 1); }
+
+    // get the releaseFence file descriptor for a display's framebuffer layer.
+    // the release fence is only valid after commit()
+    sp<Fence> getAndResetReleaseFence(int32_t id);
+
+    // needed forward declarations
+    class LayerListIterator;
+=======
+    bool hasClientComposition(int32_t displayId) const;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     // get the retire fence for the previous frame (i.e., corresponding to the
     // last call to presentDisplay
@@ -131,9 +163,123 @@ public:
     status_t setOutputBuffer(int32_t displayId, const sp<Fence>& acquireFence,
             const sp<GraphicBuffer>& buf);
 
+<<<<<<< HEAD
     // After SurfaceFlinger has retrieved the release fences for all the frames,
     // it can call this to clear the shared pointers in the release fence map
     void clearReleaseFences(int32_t displayId);
+=======
+<<<<<<< HEAD
+    // Get the retire fence for the last committed frame. This fence will
+    // signal when the h/w composer is completely finished with the frame.
+    // For physical displays, it is no longer being displayed. For virtual
+    // displays, writes to the output buffer are complete.
+    sp<Fence> getLastRetireFence(int32_t id) const;
+
+    status_t setCursorPositionAsync(int32_t id, const Rect &pos);
+
+    /*
+     * Interface to hardware composer's layers functionality.
+     * This abstracts the HAL interface to layers which can evolve in
+     * incompatible ways from one release to another.
+     * The idea is that we could extend this interface as we add
+     * features to h/w composer.
+     */
+    class HWCLayerInterface {
+    protected:
+        virtual ~HWCLayerInterface() { }
+    public:
+        virtual int32_t getCompositionType() const = 0;
+        virtual uint32_t getHints() const = 0;
+        virtual sp<Fence> getAndResetReleaseFence() = 0;
+        virtual void setDefaultState() = 0;
+        virtual void setSkip(bool skip) = 0;
+        virtual void setDim() = 0;
+        virtual void setIsCursorLayerHint(bool isCursor = true) = 0;
+        virtual void setBlending(uint32_t blending) = 0;
+        virtual void setTransform(uint32_t transform) = 0;
+        virtual void setFrame(const Rect& frame) = 0;
+        virtual void setCrop(const FloatRect& crop) = 0;
+        virtual void setVisibleRegionScreen(const Region& reg) = 0;
+        virtual void setSurfaceDamage(const Region& reg) = 0;
+        virtual void setSidebandStream(const sp<NativeHandle>& stream) = 0;
+        virtual void setBuffer(const sp<GraphicBuffer>& buffer) = 0;
+        virtual void setAcquireFenceFd(int fenceFd) = 0;
+        virtual void setPlaneAlpha(uint8_t alpha) = 0;
+        virtual void onDisplayed() = 0;
+        virtual void setAnimating(bool animating)= 0;
+    };
+
+    /*
+     * Interface used to implement an iterator to a list
+     * of HWCLayer.
+     */
+    class HWCLayer : public HWCLayerInterface {
+        friend class LayerListIterator;
+        // select the layer at the given index
+        virtual status_t setLayer(size_t index) = 0;
+        virtual HWCLayer* dup() = 0;
+        static HWCLayer* copy(HWCLayer *rhs) {
+            return rhs ? rhs->dup() : NULL;
+        }
+    protected:
+        virtual ~HWCLayer() { }
+    };
+
+    /*
+     * Iterator through a HWCLayer list.
+     * This behaves more or less like a forward iterator.
+     */
+    class LayerListIterator {
+        friend class HWComposer;
+        HWCLayer* const mLayerList;
+        size_t mIndex;
+
+        LayerListIterator() : mLayerList(NULL), mIndex(0) { }
+
+        LayerListIterator(HWCLayer* layer, size_t index)
+            : mLayerList(layer), mIndex(index) { }
+
+        // we don't allow assignment, because we don't need it for now
+        LayerListIterator& operator = (const LayerListIterator& rhs);
+
+    public:
+        // copy operators
+        LayerListIterator(const LayerListIterator& rhs)
+            : mLayerList(HWCLayer::copy(rhs.mLayerList)), mIndex(rhs.mIndex) {
+        }
+
+        ~LayerListIterator() { delete mLayerList; }
+
+        // pre-increment
+        LayerListIterator& operator++() {
+            mLayerList->setLayer(++mIndex);
+            return *this;
+        }
+
+        // dereference
+        HWCLayerInterface& operator * () { return *mLayerList; }
+        HWCLayerInterface* operator -> () { return mLayerList; }
+
+        // comparison
+        bool operator == (const LayerListIterator& rhs) const {
+            return mIndex == rhs.mIndex;
+        }
+        bool operator != (const LayerListIterator& rhs) const {
+            return !operator==(rhs);
+        }
+    };
+
+    // Returns an iterator to the beginning of the layer list
+    LayerListIterator begin(int32_t id);
+
+    // Returns an iterator to the end of the layer list
+    LayerListIterator end(int32_t id);
+=======
+    // After SurfaceFlinger has retrieved the release fences for all the frames,
+    // it can call this to clear the shared pointers in the release fence map
+    void clearReleaseFences(int32_t displayId);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     // Returns the HDR capabilities of the given display
     std::unique_ptr<HdrCapabilities> getHdrCapabilities(int32_t displayId);
@@ -147,6 +293,13 @@ public:
     nsecs_t getRefreshTimestamp(int32_t disp) const;
     bool isConnected(int32_t disp) const;
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    friend class VSyncThread;
+    friend class ExHWComposer;
+=======
+>>>>>>> CyanogenMod-cm-14.1
     // Non-const because it can update configMap inside of mDisplayData
     std::vector<std::shared_ptr<const HWC2::Display::Config>>
             getConfigs(int32_t displayId) const;
@@ -157,6 +310,10 @@ public:
     std::vector<android_color_mode_t> getColorModes(int32_t displayId) const;
 
     status_t setActiveColorMode(int32_t displayId, android_color_mode_t mode);
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     // for debugging ----------------------------------------------------------
     void dump(String8& out) const;
@@ -217,7 +374,17 @@ private:
     mutable std::unordered_map<int32_t, nsecs_t> mLastHwVSync;
 
     // thread-safe
+<<<<<<< HEAD
     mutable Mutex mVsyncLock;
+=======
+<<<<<<< HEAD
+    mutable Mutex mEventControlLock;
+
+    int mDimComp;
+=======
+    mutable Mutex mVsyncLock;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 };
 
 // ---------------------------------------------------------------------------

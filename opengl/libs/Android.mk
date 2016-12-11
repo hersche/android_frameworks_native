@@ -31,7 +31,7 @@ LOCAL_SRC_FILES:= 	       \
 	EGL/Loader.cpp 	       \
 #
 
-LOCAL_SHARED_LIBRARIES += libcutils libutils liblog libui
+LOCAL_SHARED_LIBRARIES += libbinder libcutils libutils liblog libui
 LOCAL_MODULE:= libEGL
 LOCAL_LDFLAGS += -Wl,--exclude-libs=ALL
 LOCAL_SHARED_LIBRARIES += libdl
@@ -63,11 +63,24 @@ ifneq ($(MAX_EGL_CACHE_SIZE),)
   LOCAL_CFLAGS += -DMAX_EGL_CACHE_SIZE=$(MAX_EGL_CACHE_SIZE)
 endif
 
+<<<<<<< HEAD
+=======
+ifeq ($(BOARD_USE_BGRA_8888), true)
+  LOCAL_CFLAGS += -DUSE_BGRA_8888
+endif
+
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 ifneq ($(filter address,$(SANITIZE_TARGET)),)
   LOCAL_CFLAGS_32 += -DEGL_WRAPPER_DIR=\"/$(TARGET_COPY_OUT_DATA)/lib\"
   LOCAL_CFLAGS_64 += -DEGL_WRAPPER_DIR=\"/$(TARGET_COPY_OUT_DATA)/lib64\"
 endif
 
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 LOCAL_REQUIRED_MODULES := $(egl.cfg_config_module)
 egl.cfg_config_module :=
 

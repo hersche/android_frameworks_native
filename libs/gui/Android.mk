@@ -99,10 +99,19 @@ ifeq ($(TARGET_NO_SENSOR_PERMISSION_CHECK),true)
 LOCAL_CPPFLAGS += -DNO_SENSOR_PERMISSION_CHECK
 endif
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 ifeq ($(TARGET_FORCE_SCREENSHOT_CPU_PATH),true)
 LOCAL_CPPFLAGS += -DFORCE_SCREENSHOT_CPU_PATH
 endif
 
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 include $(BUILD_SHARED_LIBRARY)
 
 ifeq (,$(ONE_SHOT_MAKEFILE))

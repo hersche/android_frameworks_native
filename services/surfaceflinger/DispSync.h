@@ -26,7 +26,15 @@
 namespace android {
 
 // Ignore present (retire) fences if the device doesn't have support for the
+<<<<<<< HEAD
 // sync framework
+=======
+<<<<<<< HEAD
+// sync framework.
+=======
+// sync framework
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #if defined(RUNNING_WITHOUT_SYNC_FRAMEWORK)
 static const bool kIgnorePresentFences = true;
 #else

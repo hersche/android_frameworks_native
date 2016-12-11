@@ -138,9 +138,19 @@ DisplayDevice::DisplayDevice(
     mConfig = config;
     mDisplay = display;
     mSurface = eglSurface;
+<<<<<<< HEAD
 #ifndef USE_HWC2
     mFormat = format;
 #endif
+=======
+<<<<<<< HEAD
+    mFormat  = format;
+=======
+#ifndef USE_HWC2
+    mFormat = format;
+#endif
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     mPageFlipCount = 0;
     mViewport.makeInvalid();
     mFrame.makeInvalid();
@@ -165,7 +175,15 @@ DisplayDevice::DisplayDevice(
 
     mPanelMountFlip = 0;
     // 1: H-Flip, 2: V-Flip, 3: 180 (HV Flip)
+<<<<<<< HEAD
     property_get("ro.panel.mountflip", property, "0");
+=======
+<<<<<<< HEAD
+    property_get("persist.panel.mountflip", property, "0");
+=======
+    property_get("ro.panel.mountflip", property, "0");
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     mPanelMountFlip = atoi(property);
 
     // initialize the display orientation transform.

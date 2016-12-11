@@ -39,6 +39,14 @@ public:
         READ_ONLY   = 0x00000001,
 #ifdef USE_MEMORY_HEAP_ION
         USE_ION_FD  = 0x00008000
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+#else
+        USE_ION_FD  = 0x00000008
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #endif
     };
 

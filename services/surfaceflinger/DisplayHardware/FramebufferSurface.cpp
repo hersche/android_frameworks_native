@@ -86,8 +86,18 @@ FramebufferSurface::FramebufferSurface(HWComposer& hwc, int disp,
             activeConfig->getHeight());
 #else
     mConsumer->setDefaultBufferFormat(mHwc.getFormat(disp));
+<<<<<<< HEAD
     mConsumer->setDefaultBufferSize(mHwc.getWidth(disp), mHwc.getHeight(disp));
 #endif
+=======
+<<<<<<< HEAD
+    mConsumer->setDefaultBufferSize(mHwc.getWidth(disp),  mHwc.getHeight(disp));
+    mConsumer->setDefaultMaxBufferCount(NUM_FRAMEBUFFER_SURFACE_BUFFERS);
+=======
+    mConsumer->setDefaultBufferSize(mHwc.getWidth(disp), mHwc.getHeight(disp));
+#endif
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     mConsumer->setMaxAcquiredBufferCount(NUM_FRAMEBUFFER_SURFACE_BUFFERS - 1);
 }
 

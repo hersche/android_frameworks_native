@@ -17,6 +17,14 @@
 #define LOG_TAG "Parcel"
 //#define LOG_NDEBUG 0
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+#include <binder/Parcel.h>
+#include <fcntl.h>
+#include <pthread.h>
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -29,6 +37,10 @@
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <unistd.h>
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
 #include <binder/Binder.h>
 #include <binder/BpBinder.h>
@@ -49,6 +61,21 @@
 #include <private/binder/binder_module.h>
 #include <private/binder/Static.h>
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+#include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #ifndef INT32_MAX
 #define INT32_MAX ((int32_t)(2147483647))
 #endif
@@ -217,8 +244,21 @@ static void release_object(const sp<ProcessState>& proc,
                         }
                     }
                 }
+<<<<<<< HEAD
 
                 close(obj.handle);
+=======
+<<<<<<< HEAD
+            close(obj.handle);
+#ifdef DISABLE_ASHMEM_TRACKING
+            } else if (obj.cookie != 0) {
+                close(obj.handle);
+#endif
+=======
+
+                close(obj.handle);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             }
             return;
         }
@@ -2570,6 +2610,11 @@ void Parcel::initState()
 #ifndef DISABLE_ASHMEM_TRACKING
     mOpenAshmemSize = 0;
 #endif
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 
     // racing multiple init leads only to multiple identical write
     if (gMaxFds == 0) {
@@ -2582,6 +2627,10 @@ void Parcel::initState()
             gMaxFds = 1024;
         }
     }
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 void Parcel::scanForFds() const

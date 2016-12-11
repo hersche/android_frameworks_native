@@ -103,8 +103,16 @@ public:
     status_t    setBlurMaskSampling(uint32_t blurMaskSampling);
     status_t    setBlurMaskAlphaThreshold(float alpha);
 
+<<<<<<< HEAD
     status_t getTransformToDisplayInverse(bool* outTransformToDisplayInverse) const;
 
+=======
+<<<<<<< HEAD
+=======
+    status_t getTransformToDisplayInverse(bool* outTransformToDisplayInverse) const;
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 private:
     // can't be copied
     SurfaceControl& operator = (SurfaceControl& rhs);

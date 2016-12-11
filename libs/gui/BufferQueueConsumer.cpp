@@ -718,6 +718,12 @@ sp<NativeHandle> BufferQueueConsumer::getSidebandStream() const {
     return mCore->mSidebandStream;
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+void BufferQueueConsumer::dump(String8& result, const char* prefix) const {
+=======
+>>>>>>> CyanogenMod-cm-14.1
 status_t BufferQueueConsumer::getOccupancyHistory(bool forceFlush,
         std::vector<OccupancyTracker::Segment>* outHistory) {
     Mutex::Autolock lock(mCore->mMutex);
@@ -732,6 +738,10 @@ status_t BufferQueueConsumer::discardFreeBuffers() {
 }
 
 void BufferQueueConsumer::dumpState(String8& result, const char* prefix) const {
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     const IPCThreadState* ipc = IPCThreadState::self();
     const pid_t pid = ipc->getCallingPid();
     const uid_t uid = ipc->getCallingUid();
@@ -742,7 +752,15 @@ void BufferQueueConsumer::dumpState(String8& result, const char* prefix) const {
                 "from pid=%d, uid=%d\n", pid, uid);
         android_errorWriteWithInfoLog(0x534e4554, "27046057", uid, NULL, 0);
     } else {
+<<<<<<< HEAD
         mCore->dumpState(result, prefix);
+=======
+<<<<<<< HEAD
+        mCore->dump(result, prefix);
+=======
+        mCore->dumpState(result, prefix);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 }
 

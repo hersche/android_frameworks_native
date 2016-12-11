@@ -70,13 +70,28 @@ bool LayerDim::isVisible() const {
     return !(s.flags & layer_state_t::eLayerHidden) && s.alpha;
 }
 
+<<<<<<< HEAD
 #ifndef USE_HWC2
+=======
+<<<<<<< HEAD
+=======
+#ifndef USE_HWC2
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 void LayerDim::setPerFrameData(const sp<const DisplayDevice>& hw,
         HWComposer::HWCLayerInterface& layer) {
   HWComposer& hwc = mFlinger->getHwComposer();
 
   Layer::setPerFrameData(hw, layer);
   if (hwc.hasDimComposition()) {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    layer.setDim();
+  }
+}
+=======
+>>>>>>> CyanogenMod-cm-14.1
     // SF Client can set RGBA color on Dim layer. Solid Black is default.
     uint32_t color = getDrawingState().color;
     uint32_t rgba_color = !color ? 0x000000FF : color;
@@ -84,6 +99,10 @@ void LayerDim::setPerFrameData(const sp<const DisplayDevice>& hw,
   }
 }
 #endif
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
 // ---------------------------------------------------------------------------
 

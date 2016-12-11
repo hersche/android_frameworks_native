@@ -88,8 +88,26 @@ void HWComposer::setEventHandler(EventHandler* handler)
         return;
     }
 
+<<<<<<< HEAD
     bool wasNull = (mEventHandler == nullptr);
     mEventHandler = handler;
+=======
+<<<<<<< HEAD
+    if (needVSyncThread) {
+        // we don't have VSYNC support, we need to fake it
+        mVSyncThread = new VSyncThread(*this);
+    }
+
+    mDimComp = 0;
+    if (mHwc) {
+      mHwc->query(mHwc, HWC_BACKGROUND_LAYER_SUPPORTED, &mDimComp);
+    }
+}
+=======
+    bool wasNull = (mEventHandler == nullptr);
+    mEventHandler = handler;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     if (wasNull) {
         auto hotplugHook = std::bind(&HWComposer::hotplug, this,
@@ -223,11 +241,78 @@ void HWComposer::vsync(const std::shared_ptr<HWC2::Display>& display,
         return;
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+static const uint32_t DISPLAY_ATTRIBUTES[] = {
+    HWC_DISPLAY_VSYNC_PERIOD,
+    HWC_DISPLAY_WIDTH,
+    HWC_DISPLAY_HEIGHT,
+    HWC_DISPLAY_DPI_X,
+    HWC_DISPLAY_DPI_Y,
+    HWC_DISPLAY_COLOR_TRANSFORM,
+    HWC_DISPLAY_NO_ATTRIBUTE,
+};
+#define NUM_DISPLAY_ATTRIBUTES (sizeof(DISPLAY_ATTRIBUTES) / sizeof(DISPLAY_ATTRIBUTES)[0])
+
+static const uint32_t PRE_HWC15_DISPLAY_ATTRIBUTES[] = {
+    HWC_DISPLAY_VSYNC_PERIOD,
+    HWC_DISPLAY_WIDTH,
+    HWC_DISPLAY_HEIGHT,
+    HWC_DISPLAY_DPI_X,
+    HWC_DISPLAY_DPI_Y,
+    HWC_DISPLAY_NO_ATTRIBUTE,
+};
+
+status_t HWComposer::queryDisplayProperties(int disp) {
+
+    LOG_ALWAYS_FATAL_IF(!mHwc || !hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_1));
+
+    // use zero as default value for unspecified attributes
+    int32_t values[NUM_DISPLAY_ATTRIBUTES - 1];
+    memset(values, 0, sizeof(values));
+
+    const size_t MAX_NUM_CONFIGS = 128;
+    uint32_t configs[MAX_NUM_CONFIGS] = {0};
+    size_t numConfigs = MAX_NUM_CONFIGS;
+    status_t err = mHwc->getDisplayConfigs(mHwc, disp, configs, &numConfigs);
+    if (err != NO_ERROR) {
+        // this can happen if an unpluggable display is not connected
+        mDisplayData[disp].connected = false;
+        return err;
+    }
+
+    int currentConfig = getActiveConfig(disp);
+    if (currentConfig < 0 || currentConfig > static_cast<int>((numConfigs-1))) {
+        ALOGE("%s: Invalid display config! %d", __FUNCTION__, currentConfig);
+        currentConfig = 0;
+    }
+    mDisplayData[disp].currentConfig = currentConfig;
+    for (size_t c = 0; c < numConfigs; ++c) {
+        err = mHwc->getDisplayAttributes(mHwc, disp, configs[c],
+                DISPLAY_ATTRIBUTES, values);
+        // If this is a pre-1.5 HWC, it may not know about color transform, so
+        // try again with a smaller set of attributes
+        if (err != NO_ERROR) {
+            err = mHwc->getDisplayAttributes(mHwc, disp, configs[c],
+                    PRE_HWC15_DISPLAY_ATTRIBUTES, values);
+        }
+        if (err != NO_ERROR) {
+            // we can't get this display's info. turn it off.
+            mDisplayData[disp].connected = false;
+            return err;
+        }
+=======
+>>>>>>> CyanogenMod-cm-14.1
     if (mHwcDisplaySlots.count(display->getId()) == 0) {
         ALOGE("Unknown physical display %" PRIu64 " passed to vsync callback",
                 display->getId());
         return;
     }
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     int32_t disp = mHwcDisplaySlots[display->getId()];
     {
@@ -246,11 +331,28 @@ void HWComposer::vsync(const std::shared_ptr<HWC2::Display>& display,
         mLastHwVSync[disp] = timestamp;
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    // FIXME: what should we set the format to?
+#ifdef USE_BGRA_8888
+    mDisplayData[disp].format = HAL_PIXEL_FORMAT_BGRA_8888;
+#else
+    mDisplayData[disp].format = HAL_PIXEL_FORMAT_RGBA_8888;
+#endif
+    mDisplayData[disp].connected = true;
+    return NO_ERROR;
+=======
+>>>>>>> CyanogenMod-cm-14.1
     char tag[16];
     snprintf(tag, sizeof(tag), "HW_VSYNC_%1u", disp);
     ATRACE_INT(tag, ++mVSyncCounts[disp] & 1);
 
     mEventHandler->onVSyncReceived(disp, timestamp);
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 status_t HWComposer::allocateVirtualDisplay(uint32_t width, uint32_t height,
@@ -323,11 +425,29 @@ bool HWComposer::isConnected(int32_t disp) const {
     return mDisplayData[disp].hwcDisplay->isConnected();
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+uint32_t HWComposer::getFormat(int disp) const {
+    if (static_cast<uint32_t>(disp) >= MAX_HWC_DISPLAYS || !mAllocatedDisplayIDs.hasBit(disp)) {
+#ifdef USE_BGRA_8888
+        return HAL_PIXEL_FORMAT_BGRA_8888;
+#else
+        return HAL_PIXEL_FORMAT_RGBA_8888;
+#endif
+    } else {
+        return mDisplayData[disp].format;
+=======
+>>>>>>> CyanogenMod-cm-14.1
 std::vector<std::shared_ptr<const HWC2::Display::Config>>
         HWComposer::getConfigs(int32_t displayId) const {
     if (!isValidDisplay(displayId)) {
         ALOGE("getConfigs: Attempted to access invalid display %d", displayId);
         return {};
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
     auto& displayData = mDisplayData[displayId];
     auto configs = mDisplayData[displayId].hwcDisplay->getConfigs();
@@ -514,6 +634,55 @@ status_t HWComposer::prepare(DisplayDevice& displayDevice) {
         return BAD_INDEX;
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    int err = mHwc->prepare(mHwc, mNumDisplays, mLists);
+    ALOGE_IF(err, "HWComposer: prepare failed (%s)", strerror(-err));
+
+    if (err == NO_ERROR) {
+        // here we're just making sure that "skip" layers are set
+        // to HWC_FRAMEBUFFER and we're also counting how many layers
+        // we have of each type.
+        //
+        // If there are no window layers, we treat the display has having FB
+        // composition, because SurfaceFlinger will use GLES to draw the
+        // wormhole region.
+        for (size_t i=0 ; i<mNumDisplays ; i++) {
+            DisplayData& disp(mDisplayData[i]);
+            disp.hasFbComp = false;
+            disp.hasOvComp = false;
+            if (disp.list) {
+                for (size_t j=0 ; j<disp.list->numHwLayers ; j++) {
+                    hwc_layer_1_t& l = disp.list->hwLayers[j];
+
+                    //ALOGD("prepare: %d, type=%d, handle=%p",
+                    //        i, l.compositionType, l.handle);
+
+                    if ((i == DisplayDevice::DISPLAY_PRIMARY) &&
+                        l.flags & HWC_SKIP_LAYER) {
+                        l.compositionType = HWC_FRAMEBUFFER;
+                    }
+                    if (l.compositionType == HWC_FRAMEBUFFER) {
+                        disp.hasFbComp = true;
+                    }
+                    if (l.compositionType == HWC_OVERLAY) {
+                        disp.hasOvComp = true;
+                    }
+                    if (isCompositionTypeBlit(l.compositionType)) {
+                        disp.hasFbComp = true;
+                    }
+                    if (l.compositionType == HWC_CURSOR_OVERLAY) {
+                        disp.hasOvComp = true;
+                    }
+                }
+                if (disp.list->numHwLayers == (disp.framebufferTarget ? 1 : 0)) {
+                    disp.hasFbComp = true;
+                }
+            } else {
+                disp.hasFbComp = true;
+=======
+>>>>>>> CyanogenMod-cm-14.1
     displayData.hasClientComposition = false;
     displayData.hasDeviceComposition = false;
     for (auto& layer : displayDevice.getVisibleLayersSortedByZ()) {
@@ -549,6 +718,10 @@ status_t HWComposer::prepare(DisplayDevice& displayDevice) {
             if (layerRequests.count(hwcLayer) != 0) {
                 ALOGE("prepare: Unknown layer request: %s",
                         to_string(layerRequests[hwcLayer]).c_str());
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
             }
             layer->setClearClientTarget(displayId, false);
         }
@@ -627,6 +800,26 @@ status_t HWComposer::commit(int32_t displayId) {
         return UNKNOWN_ERROR;
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+status_t HWComposer::setActiveConfig(int disp, int mode) {
+    LOG_FATAL_IF(disp >= VIRTUAL_DISPLAY_ID_BASE);
+    DisplayData& dd(mDisplayData[disp]);
+    if (mHwc && hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_4)) {
+        status_t status = static_cast<status_t>(
+                mHwc->setActiveConfig(mHwc, disp, mode));
+        if (status == NO_ERROR) {
+            dd.currentConfig = mode;
+        } else {
+            ALOGE("%s Failed to set new config (%d) for display (%d)",
+                    __FUNCTION__, mode, disp);
+        }
+        return status;
+    } else {
+        LOG_FATAL_IF(mode != 0);
+=======
+>>>>>>> CyanogenMod-cm-14.1
     std::unordered_map<std::shared_ptr<HWC2::Layer>, sp<Fence>> releaseFences;
     error = hwcDisplay->getReleaseFences(&releaseFences);
     if (error != HWC2::Error::None) {
@@ -634,6 +827,10 @@ status_t HWComposer::commit(int32_t displayId) {
                 displayId, to_string(error).c_str(),
                 static_cast<int32_t>(error));
         return UNKNOWN_ERROR;
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 
     displayData.releaseFences = std::move(releaseFences);
@@ -641,6 +838,49 @@ status_t HWComposer::commit(int32_t displayId) {
     return NO_ERROR;
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+int HWComposer::getActiveConfig(int disp) const {
+    LOG_FATAL_IF(disp >= VIRTUAL_DISPLAY_ID_BASE);
+    if (mHwc && hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_4)) {
+        return mHwc->getActiveConfig(mHwc, disp);
+    } else {
+        return 0;
+    }
+}
+
+void HWComposer::disconnectDisplay(int disp) {
+    LOG_ALWAYS_FATAL_IF(disp < 0 || disp == HWC_DISPLAY_PRIMARY);
+    DisplayData& dd(mDisplayData[disp]);
+    free(dd.list);
+    dd.list = NULL;
+    dd.framebufferTarget = NULL;    // points into dd.list
+    dd.fbTargetHandle = NULL;
+    dd.outbufHandle = NULL;
+    dd.lastRetireFence = Fence::NO_FENCE;
+    dd.lastDisplayFence = Fence::NO_FENCE;
+    dd.outbufAcquireFence = Fence::NO_FENCE;
+    // clear all the previous configs and repopulate when a new
+    // device is added
+    dd.configs.clear();
+}
+
+int HWComposer::getVisualID() const {
+    if (mHwc && hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_1)) {
+        // FIXME: temporary hack until HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED
+        // is supported by the implementation. we can only be in this case
+        // if we have HWC 1.1
+#ifdef USE_BGRA_8888
+        return HAL_PIXEL_FORMAT_BGRA_8888;
+#else
+        return HAL_PIXEL_FORMAT_RGBA_8888;
+#endif
+        //return HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED;
+    } else {
+        return mFbDev->format;
+=======
+>>>>>>> CyanogenMod-cm-14.1
 status_t HWComposer::setPowerMode(int32_t displayId, int32_t intMode) {
     ALOGV("setPowerMode(%d, %d)", displayId, intMode);
     if (!isValidDisplay(displayId)) {
@@ -656,6 +896,10 @@ status_t HWComposer::setPowerMode(int32_t displayId, int32_t intMode) {
     auto mode = static_cast<HWC2::PowerMode>(intMode);
     if (mode == HWC2::PowerMode::Off) {
         setVsyncEnabled(displayId, HWC2::Vsync::Disable);
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 
     auto& hwcDisplay = mDisplayData[displayId].hwcDisplay;
@@ -776,11 +1020,160 @@ void HWComposer::disconnectDisplay(int displayId) {
     displayData.reset();
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    virtual int32_t getCompositionType() const {
+        return getLayer()->compositionType;
+    }
+    virtual uint32_t getHints() const {
+        return getLayer()->hints;
+    }
+    virtual sp<Fence> getAndResetReleaseFence() {
+        int fd = getLayer()->releaseFenceFd;
+        getLayer()->releaseFenceFd = -1;
+        return fd >= 0 ? new Fence(fd) : Fence::NO_FENCE;
+    }
+    virtual void setAcquireFenceFd(int fenceFd) {
+        getLayer()->acquireFenceFd = fenceFd;
+    }
+    virtual void setPerFrameDefaultState() {
+        //getLayer()->compositionType = HWC_FRAMEBUFFER;
+    }
+    virtual void setPlaneAlpha(uint8_t alpha) {
+        if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_2)) {
+            getLayer()->planeAlpha = alpha;
+        } else {
+            if (alpha < 0xFF) {
+                getLayer()->flags |= HWC_SKIP_LAYER;
+            }
+        }
+    }
+    virtual void setAnimating(bool animating) {
+        if (animating) {
+#ifdef QTI_BSP
+            getLayer()->flags |= HWC_SCREENSHOT_ANIMATOR_LAYER;
+#endif
+        } else {
+#ifdef QTI_BSP
+            getLayer()->flags &= ~HWC_SCREENSHOT_ANIMATOR_LAYER;
+#endif
+        }
+    }
+    virtual void setDefaultState() {
+        hwc_layer_1_t* const l = getLayer();
+        l->compositionType = HWC_FRAMEBUFFER;
+        l->hints = 0;
+        l->flags = HWC_SKIP_LAYER;
+        l->handle = 0;
+        l->transform = 0;
+        l->blending = HWC_BLENDING_NONE;
+        l->visibleRegionScreen.numRects = 0;
+        l->visibleRegionScreen.rects = NULL;
+        l->acquireFenceFd = -1;
+        l->releaseFenceFd = -1;
+        l->planeAlpha = 0xFF;
+    }
+    virtual void setSkip(bool skip) {
+        if (skip) {
+            getLayer()->flags |= HWC_SKIP_LAYER;
+        } else {
+            getLayer()->flags &= ~HWC_SKIP_LAYER;
+        }
+    }
+    virtual void setDim() {
+        setSkip(false);
+        getLayer()->flags |= 0x80000000;
+    }
+    virtual void setIsCursorLayerHint(bool isCursor) {
+        if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_4)) {
+            if (isCursor) {
+                getLayer()->flags |= HWC_IS_CURSOR_LAYER;
+            }
+            else {
+                getLayer()->flags &= ~HWC_IS_CURSOR_LAYER;
+            }
+        }
+    }
+    virtual void setBlending(uint32_t blending) {
+        getLayer()->blending = blending;
+    }
+    virtual void setTransform(uint32_t transform) {
+        getLayer()->transform = transform;
+    }
+    virtual void setFrame(const Rect& frame) {
+        getLayer()->displayFrame = reinterpret_cast<hwc_rect_t const&>(frame);
+    }
+    virtual void setCrop(const FloatRect& crop) {
+        if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_3)) {
+            getLayer()->sourceCropf = reinterpret_cast<hwc_frect_t const&>(crop);
+        } else {
+            /*
+             * Since h/w composer didn't support a flot crop rect before version 1.3,
+             * using integer coordinates instead produces a different output from the GL code in
+             * Layer::drawWithOpenGL(). The difference can be large if the buffer crop to
+             * window size ratio is large and a window crop is defined
+             * (i.e.: if we scale the buffer a lot and we also crop it with a window crop).
+             */
+            hwc_rect_t& r = getLayer()->sourceCrop;
+            r.left  = int(ceilf(crop.left));
+            r.top   = int(ceilf(crop.top));
+            r.right = int(floorf(crop.right));
+            r.bottom= int(floorf(crop.bottom));
+        }
+    }
+    virtual void setVisibleRegionScreen(const Region& reg) {
+        // Region::getSharedBuffer creates a reference to the underlying
+        // SharedBuffer of this Region, this reference is freed
+        // in onDisplayed()
+        hwc_region_t& visibleRegion = getLayer()->visibleRegionScreen;
+        SharedBuffer const* sb = reg.getSharedBuffer(&visibleRegion.numRects);
+        visibleRegion.rects = reinterpret_cast<hwc_rect_t const *>(sb->data());
+    }
+    virtual void setSurfaceDamage(const Region& reg) {
+        if (!hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_5)) {
+            return;
+        }
+        hwc_region_t& surfaceDamage = getLayer()->surfaceDamage;
+        // We encode default full-screen damage as INVALID_RECT upstream, but as
+        // 0 rects for HWComposer
+        if (reg.isRect() && reg.getBounds() == Rect::INVALID_RECT) {
+            surfaceDamage.numRects = 0;
+            surfaceDamage.rects = NULL;
+            return;
+        }
+        SharedBuffer const* sb = reg.getSharedBuffer(&surfaceDamage.numRects);
+        surfaceDamage.rects = reinterpret_cast<hwc_rect_t const *>(sb->data());
+    }
+    virtual void setSidebandStream(const sp<NativeHandle>& stream) {
+        ALOG_ASSERT(stream->handle() != NULL);
+        getLayer()->compositionType = HWC_SIDEBAND;
+        getLayer()->sidebandStream = stream->handle();
+    }
+    virtual void setBuffer(const sp<GraphicBuffer>& buffer) {
+        if (buffer == 0 || buffer->handle == 0) {
+            getLayer()->compositionType = HWC_FRAMEBUFFER;
+            getLayer()->flags |= HWC_SKIP_LAYER;
+            getLayer()->handle = 0;
+        } else {
+            if (getLayer()->compositionType == HWC_SIDEBAND) {
+                // If this was a sideband layer but the stream was removed, reset
+                // it to FRAMEBUFFER. The HWC can change it to OVERLAY in prepare.
+                getLayer()->compositionType = HWC_FRAMEBUFFER;
+            }
+            getLayer()->handle = buffer->handle;
+        }
+=======
+>>>>>>> CyanogenMod-cm-14.1
 status_t HWComposer::setOutputBuffer(int32_t displayId,
         const sp<Fence>& acquireFence, const sp<GraphicBuffer>& buffer) {
     if (!isValidDisplay(displayId)) {
         ALOGE("setOutputBuffer: Display %d is not valid", displayId);
         return BAD_INDEX;
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 
     auto& hwcDisplay = mDisplayData[displayId].hwcDisplay;
@@ -857,10 +1250,112 @@ static String8 getFormatStr(PixelFormat format) {
 */
 
 void HWComposer::dump(String8& result) const {
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    Mutex::Autolock _l(mDisplayLock);
+    if (mHwc) {
+        result.appendFormat("Hardware Composer state (version %08x):\n", hwcApiVersion(mHwc));
+        result.appendFormat("  mDebugForceFakeVSync=%d\n", mDebugForceFakeVSync);
+        for (size_t i=0 ; i<mNumDisplays ; i++) {
+            const DisplayData& disp(mDisplayData[i]);
+            if (!disp.connected)
+                continue;
+
+            const Vector< sp<Layer> >& visibleLayersSortedByZ =
+                    mFlinger->getLayerSortedByZForHwcDisplay(i);
+
+
+            result.appendFormat("  Display[%zd] configurations (* current):\n", i);
+            for (size_t c = 0; c < disp.configs.size(); ++c) {
+                const DisplayConfig& config(disp.configs[c]);
+                result.appendFormat("    %s%zd: %ux%u, xdpi=%f, ydpi=%f"
+                        ", refresh=%" PRId64 ", colorTransform=%d\n",
+                        c == disp.currentConfig ? "* " : "", c,
+                        config.width, config.height, config.xdpi, config.ydpi,
+                        config.refresh, config.colorTransform);
+            }
+
+            if (disp.list) {
+                result.appendFormat(
+                        "  numHwLayers=%zu, flags=%08x\n",
+                        disp.list->numHwLayers, disp.list->flags);
+
+                result.append(
+                        "    type   |  handle  | hint | flag | tr | blnd |   format    |     source crop (l,t,r,b)      |          frame         | name \n"
+                        "-----------+----------+------+------+----+------+-------------+--------------------------------+------------------------+------\n");
+                //      " _________ | ________ | ____ | ____ | __ | ____ | ___________ |_____._,_____._,_____._,_____._ |_____,_____,_____,_____ | ___...
+                for (size_t i=0 ; i<disp.list->numHwLayers ; i++) {
+                    const hwc_layer_1_t&l = disp.list->hwLayers[i];
+                    int32_t format = -1;
+                    String8 name("unknown");
+
+                    if (i < visibleLayersSortedByZ.size()) {
+                        const sp<Layer>& layer(visibleLayersSortedByZ[i]);
+                        const sp<GraphicBuffer>& buffer(
+                                layer->getActiveBuffer());
+                        if (buffer != NULL) {
+                            format = buffer->getPixelFormat();
+                        }
+                        name = layer->getName();
+                    }
+
+                    int type = l.compositionType;
+                    if (type == HWC_FRAMEBUFFER_TARGET) {
+                        name = "HWC_FRAMEBUFFER_TARGET";
+                        format = disp.format;
+                    }
+
+                    static char const* compositionTypeName[] = {
+                            "GLES",
+                            "HWC",
+                            "BKGND",
+                            "FB TARGET",
+                            "SIDEBAND",
+                            "HWC_CURSOR",
+                            "UNKNOWN"};
+                    if (type >= NELEM(compositionTypeName))
+                        type = NELEM(compositionTypeName) - 1;
+
+                    String8 formatStr = getFormatStr(format);
+                    if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_3)) {
+                        result.appendFormat(
+                                " %9s | %08" PRIxPTR " | %04x | %04x | %02x | %04x | %-11s |%7.1f,%7.1f,%7.1f,%7.1f |%5d,%5d,%5d,%5d | %s\n",
+                                        (isCompositionTypeBlit(l.compositionType)) ? "HWC_BLIT" : compositionTypeName[type],
+                                        intptr_t(l.handle), l.hints, l.flags, l.transform, l.blending, formatStr.string(),
+                                        l.sourceCropf.left, l.sourceCropf.top, l.sourceCropf.right, l.sourceCropf.bottom,
+                                        l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom,
+                                        name.string());
+                    } else {
+                        result.appendFormat(
+                                " %9s | %08" PRIxPTR " | %04x | %04x | %02x | %04x | %-11s |%7d,%7d,%7d,%7d |%5d,%5d,%5d,%5d | %s\n",
+                                        (isCompositionTypeBlit(l.compositionType)) ? "HWC_BLIT" : compositionTypeName[type],
+                                        intptr_t(l.handle), l.hints, l.flags, l.transform, l.blending, formatStr.string(),
+                                        l.sourceCrop.left, l.sourceCrop.top, l.sourceCrop.right, l.sourceCrop.bottom,
+                                        l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom,
+                                        name.string());
+                    }
+                }
+            }
+        }
+    }
+
+    if (mHwc && mHwc->dump) {
+        const size_t SIZE = 4096;
+        char buffer[SIZE];
+        mHwc->dump(mHwc, buffer, SIZE);
+        result.append(buffer);
+    }
+=======
+>>>>>>> CyanogenMod-cm-14.1
     // TODO: In order to provide a dump equivalent to HWC1, we need to shadow
     // all the state going into the layers. This is probably better done in
     // Layer itself, but it's going to take a bit of work to get there.
     result.append(mHwcDevice->dump().c_str());
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 // ---------------------------------------------------------------------------
@@ -879,9 +1374,37 @@ HWComposer::DisplayData::DisplayData()
 HWComposer::DisplayData::~DisplayData() {
 }
 
+<<<<<<< HEAD
 void HWComposer::DisplayData::reset() {
     ALOGV("DisplayData reset");
     *this = DisplayData();
+=======
+<<<<<<< HEAD
+HWComposer::DisplayData::DisplayData()
+:   configs(),
+    currentConfig(0),
+#ifdef USE_BGRA_8888
+    format(HAL_PIXEL_FORMAT_BGRA_8888),
+#else
+    format(HAL_PIXEL_FORMAT_RGBA_8888),
+#endif
+    connected(false),
+    hasFbComp(false), hasOvComp(false),
+    capacity(0), list(NULL),
+    framebufferTarget(NULL), fbTargetHandle(0),
+    lastRetireFence(Fence::NO_FENCE), lastDisplayFence(Fence::NO_FENCE),
+    outbufHandle(NULL), outbufAcquireFence(Fence::NO_FENCE),
+    events(0)
+{}
+
+HWComposer::DisplayData::~DisplayData() {
+    free(list);
+=======
+void HWComposer::DisplayData::reset() {
+    ALOGV("DisplayData reset");
+    *this = DisplayData();
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 // ---------------------------------------------------------------------------

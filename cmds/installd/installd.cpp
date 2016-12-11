@@ -418,6 +418,11 @@ static int do_move_ab(char **arg, char reply[REPLY_MAX] ATTRIBUTE_UNUSED) {
     return move_ab(arg[0], arg[1], arg[2]);
 }
 
+static int do_delete_odex(char **arg, char reply[REPLY_MAX] ATTRIBUTE_UNUSED) {
+    // apk_path, instruction_set, oat_dir
+    return delete_odex(arg[0], arg[1], arg[2]) ? 0 : -1;
+}
+
 struct cmdinfo {
     const char *name;
     unsigned numargs;
@@ -444,7 +449,21 @@ struct cmdinfo cmds[] = {
     { "rmdex",                2, do_rm_dex },
     { "freecache",            2, do_free_cache },
     { "linklib",              4, do_linklib },
+<<<<<<< HEAD
     { "idmap",                3, do_idmap },
+=======
+<<<<<<< HEAD
+    { "mkuserdata",           5, do_mk_user_data },
+    { "mkuserconfig",         1, do_mk_user_config },
+    { "rmuser",               2, do_rm_user },
+    { "idmap",                6, do_idmap },
+    { "aapt",                 7, do_aapt },
+    { "aapt_with_common",     8, do_aapt_with_common },
+    { "restorecondata",       4, do_restorecon_data },
+=======
+    { "idmap",                3, do_idmap },
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     { "createoatdir",         2, do_create_oat_dir },
     { "rmpackagedir",         1, do_rm_package_dir },
     { "clear_app_profiles",   1, do_clear_app_profiles },
@@ -453,6 +472,7 @@ struct cmdinfo cmds[] = {
     { "move_ab",              3, do_move_ab },
     { "merge_profiles",       2, do_merge_profiles },
     { "dump_profiles",        3, do_dump_profiles },
+    { "delete_odex",          3, do_delete_odex },
 };
 
 static int readx(int s, void *_buf, int count)
@@ -563,10 +583,33 @@ static bool initialize_globals() {
         ALOGE("Could not find ANDROID_DATA");
         return false;
     }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+    // Get the android external app directory.
+    if (get_path_from_string(&android_prebundled_dir, PREBUNDLED_APP_PREFIX) < 0) {
+        return -1;
+    }
+
+
+    // Take note of the system and vendor directories.
+    android_system_dirs.count = 4;
+
+    android_system_dirs.dirs = (dir_rec_t*) calloc(android_system_dirs.count, sizeof(dir_rec_t));
+    if (android_system_dirs.dirs == NULL) {
+        ALOGE("Couldn't allocate array for dirs; aborting\n");
+        return -1;
+=======
+>>>>>>> CyanogenMod-cm-14.1
     const char* root_path = getenv("ANDROID_ROOT");
     if (root_path == nullptr) {
         ALOGE("Could not find ANDROID_ROOT");
         return false;
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 
     return init_globals_from_data_and_root(data_path, root_path);

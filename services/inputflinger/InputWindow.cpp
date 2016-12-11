@@ -46,8 +46,17 @@ bool InputWindowInfo::isTrustedOverlay() const {
             || layoutParamsType == TYPE_MAGNIFICATION_OVERLAY
             || layoutParamsType == TYPE_STATUS_BAR
             || layoutParamsType == TYPE_NAVIGATION_BAR
+<<<<<<< HEAD
             || layoutParamsType == TYPE_SECURE_SYSTEM_OVERLAY
             || layoutParamsType == TYPE_DOCK_DIVIDER;
+=======
+<<<<<<< HEAD
+            || layoutParamsType == TYPE_SECURE_SYSTEM_OVERLAY;
+=======
+            || layoutParamsType == TYPE_SECURE_SYSTEM_OVERLAY
+            || layoutParamsType == TYPE_DOCK_DIVIDER;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 bool InputWindowInfo::supportsSplitTouch() const {

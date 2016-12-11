@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 /* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+=======
+<<<<<<< HEAD
+/* Copyright (c) 2015 - 2016, The Linux Foundation. All rights reserved.
+=======
+/* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -29,9 +37,18 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
+<<<<<<< HEAD
 #include <unistd.h>
 
 #include <cutils/properties.h>
+=======
+<<<<<<< HEAD
+=======
+#include <unistd.h>
+
+#include <cutils/properties.h>
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
 #include <utils/Errors.h>
 #include <utils/Log.h>
@@ -42,14 +59,39 @@
 #include "RenderEngine/RenderEngine.h"
 #include "DisplayHardware/FramebufferSurface.h"
 #include "DisplayUtils.h"
+<<<<<<< HEAD
 #if defined(QTI_BSP) && !defined(USE_HWC2)
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #include <ExSurfaceFlinger/ExSurfaceFlinger.h>
 #include <ExSurfaceFlinger/ExLayer.h>
 #include <ExSurfaceFlinger/ExHWComposer.h>
 #include <ExSurfaceFlinger/ExVirtualDisplaySurface.h>
+<<<<<<< HEAD
 #include <dlfcn.h>
 #include <gralloc_priv.h>
 #endif
+=======
+<<<<<<< HEAD
+#include <gralloc_priv.h>
+#ifdef SDM_TARGET
+#include <qd_utils.h>
+#include <display_config.h>
+#endif
+#endif
+#include <dlfcn.h>
+#include <cutils/properties.h>
+=======
+#include <dlfcn.h>
+#include <gralloc_priv.h>
+#endif
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
 namespace android {
 
@@ -57,9 +99,20 @@ DisplayUtils* DisplayUtils::sDisplayUtils = NULL;
 bool DisplayUtils::sUseExtendedImpls = false;
 
 DisplayUtils::DisplayUtils() {
+<<<<<<< HEAD
 #if defined(QTI_BSP) && !defined(USE_HWC2)
     sUseExtendedImpls = true;
     hasWbNode();
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+    sUseExtendedImpls = true;
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+    sUseExtendedImpls = true;
+    hasWbNode();
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #endif
 }
 
@@ -71,7 +124,15 @@ DisplayUtils* DisplayUtils::getInstance() {
 }
 
 SurfaceFlinger* DisplayUtils::getSFInstance() {
+<<<<<<< HEAD
 #if defined(QTI_BSP) && !defined(USE_HWC2)
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     if(sUseExtendedImpls) {
         return new ExSurfaceFlinger();
     }
@@ -82,7 +143,15 @@ SurfaceFlinger* DisplayUtils::getSFInstance() {
 Layer* DisplayUtils::getLayerInstance(SurfaceFlinger* flinger,
                             const sp<Client>& client, const String8& name,
                             uint32_t w, uint32_t h, uint32_t flags) {
+<<<<<<< HEAD
 #if defined(QTI_BSP) && !defined(USE_HWC2)
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     if(sUseExtendedImpls) {
         return new ExLayer(flinger, client, name, w, h, flags);
     }
@@ -93,17 +162,35 @@ Layer* DisplayUtils::getLayerInstance(SurfaceFlinger* flinger,
 HWComposer* DisplayUtils::getHWCInstance(
                         const sp<SurfaceFlinger>& flinger,
                         HWComposer::EventHandler& handler) {
+<<<<<<< HEAD
 #if defined(QTI_BSP) && !defined(USE_HWC2)
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     if(sUseExtendedImpls) {
         return new ExHWComposer(flinger, handler);
     }
 #endif
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    return new HWComposer(flinger,handler);
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #if defined(USE_HWC2)
     (void)handler;
     return new HWComposer(flinger);
 #else
     return new HWComposer(flinger, handler);
 #endif
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 void DisplayUtils::initVDSInstance(HWComposer* hwc, int32_t hwcDisplayId,
@@ -112,7 +199,15 @@ void DisplayUtils::initVDSInstance(HWComposer* hwc, int32_t hwcDisplayId,
         sp<IGraphicBufferConsumer> bqConsumer, String8 currentStateDisplayName,
         bool currentStateIsSecure, int currentStateType)
 {
+<<<<<<< HEAD
 #if defined(QTI_BSP) && !defined(USE_HWC2)
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     if(sUseExtendedImpls) {
         if(hwc->isVDSEnabled()) {
             VirtualDisplaySurface* vds = new ExVirtualDisplaySurface(*hwc, hwcDisplayId,
@@ -135,7 +230,15 @@ void DisplayUtils::initVDSInstance(HWComposer* hwc, int32_t hwcDisplayId,
                 currentStateSurface, bqProducer, bqConsumer, currentStateDisplayName);
         dispSurface = vds;
         producer = vds;
+<<<<<<< HEAD
 #if defined(QTI_BSP) && !defined(USE_HWC2)
+=======
+<<<<<<< HEAD
+#ifdef QTI_BSP
+=======
+#if defined(QTI_BSP) && !defined(USE_HWC2)
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     }
 #endif
 }
@@ -168,10 +271,22 @@ bool DisplayUtils::createV4L2BasedVirtualDisplay(HWComposer* hwc, int32_t &hwcDi
         surface = eglCreateWindowSurface(display, config, window, NULL);
         eglQuerySurface(display, surface, EGL_WIDTH, &w);
         eglQuerySurface(display, surface, EGL_HEIGHT, &h);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        if(hwc->setVirtualDisplayProperties(hwcDisplayId, w, h, format) != NO_ERROR)
+            return false;
+
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #if defined(QTI_BSP) && !defined(USE_HWC2)
         if(hwc->setVirtualDisplayProperties(hwcDisplayId, w, h, format) != NO_ERROR)
             return false;
 #endif
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         dispSurface = new FramebufferSurface(*hwc, currentStateType, bqConsumer);
         producer = bqProducer;
         return true;
@@ -182,6 +297,41 @@ bool DisplayUtils::createV4L2BasedVirtualDisplay(HWComposer* hwc, int32_t &hwcDi
 bool DisplayUtils::canAllocateHwcDisplayIdForVDS(int usage) {
     // on AOSP builds with QTI_BSP disabled, we should allocate hwc display id for virtual display
     int flag_mask = 0xffffffff;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+#ifdef QTI_BSP
+#ifdef FORCE_HWC_COPY_FOR_VIRTUAL_DISPLAYS
+#ifdef SDM_TARGET
+    int hdmi_node = qdutils::getHDMINode();
+    if(hdmi_node == HWC_DISPLAY_PRIMARY) {
+        int active_config = qdutils::getActiveConfig(HWC_DISPLAY_PRIMARY);
+        if(active_config >= 0) {
+            qdutils::DisplayAttributes attr = qdutils::getDisplayAttributes(active_config,
+                    HWC_DISPLAY_PRIMARY);
+            if(!attr.is_yuv) {
+                // Reserve hardware acceleration for WFD use-case
+                flag_mask = GRALLOC_USAGE_PRIVATE_WFD;
+            }
+        }
+    } else {
+#endif
+        // Reserve hardware acceleration for WFD use-case
+        flag_mask = GRALLOC_USAGE_PRIVATE_WFD;
+#ifdef SDM_TARGET
+    }
+#endif
+#else
+    // Don't allocate HWC display unless we force HWC copy, otherwise
+    // incompatible buffers are sent to the media stack
+    flag_mask = 0;
+#endif
+#endif
+
+    return (usage & flag_mask);
+=======
+>>>>>>> CyanogenMod-cm-14.1
     char value[PROPERTY_VALUE_MAX];
     property_get("debug.vds.allow_hwc", value, "0");
     int allowHwcForVDS = atoi(value);
@@ -229,6 +379,10 @@ bool DisplayUtils::hasWbNode() {
         }
     }
     return mHasWbNode;
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 }; // namespace android

@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 /* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+=======
+<<<<<<< HEAD
+/* Copyright (c) 2015, The Linux Foundation. All rights reserved.
+=======
+/* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -33,7 +41,14 @@
 #ifdef QTI_BSP
 #include <hardware/display_defs.h>
 #endif
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
 
 namespace android {
@@ -209,8 +224,20 @@ void ExSurfaceFlinger::isfreezeSurfacePresent(bool& freezeSurfacePresent,
     /* Get the layers in the current drawing state */
     const LayerVector& layers(mDrawingState.layersSortedByZ);
     const size_t layerCount = layers.size();
+<<<<<<< HEAD
     /* Look for ScreenShotSurface in external layer list */
     if(id != HWC_DISPLAY_PRIMARY) {
+=======
+<<<<<<< HEAD
+    /* Look for ScreenShotSurface in external layer list, only when
+     * disable external rotation animation feature is enabled
+     */
+    if(mDisableExtAnimation && (id != HWC_DISPLAY_PRIMARY)) {
+=======
+    /* Look for ScreenShotSurface in external layer list */
+    if(id != HWC_DISPLAY_PRIMARY) {
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
         for (size_t i = 0 ; i < layerCount ; ++i) {
             static int screenShotLen = strlen("ScreenshotSurface");
             const sp<Layer>& layer(layers[i]);
@@ -234,8 +261,16 @@ void ExSurfaceFlinger::setOrientationEventControl(bool& freezeSurfacePresent,
                              const int32_t& id) {
     HWComposer& hwc(getHwComposer());
     HWComposer::LayerListIterator cur = hwc.begin(id);
+<<<<<<< HEAD
     if(!cur)
         return;
+=======
+<<<<<<< HEAD
+=======
+    if(!cur)
+        return;
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
     if(freezeSurfacePresent) {
         /* If freezeSurfacePresent, set ANIMATING flag
@@ -268,6 +303,11 @@ void ExSurfaceFlinger::drawWormHoleIfRequired(HWComposer::LayerListIterator& cur
     }
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> CyanogenMod-cm-14.1
 #if (defined QTI_BSP) && (defined QTI_S3D)
 bool ExSurfaceFlinger::isS3DLayerPresent(const sp<const DisplayDevice>& hw) {
     const Vector< sp<Layer> >& visibleLayersSortedByZ =
@@ -291,6 +331,10 @@ bool ExSurfaceFlinger::isS3DLayerPresent(const sp<const DisplayDevice>&) {
 }
 #endif
 
+<<<<<<< HEAD
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 #ifdef DEBUG_CONT_DUMPSYS
 status_t ExSurfaceFlinger::dump(int fd, const Vector<String16>& args) {
     // Format: adb shell dumpsys SurfaceFlinger --file --no-limit
@@ -359,6 +403,16 @@ void ExSurfaceFlinger::dumpDrawCycle(bool prePrepare) {
 
     gettimeofday(&tv, NULL);
     ptm = localtime(&tv.tv_sec);
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    if (ptm == NULL) {
+        return;
+    }
+
+=======
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
     strftime (hms, sizeof (hms), "%H:%M:%S", ptm);
     millis = tv.tv_usec / 1000;
     snprintf(timeStamp, sizeof(timeStamp), "Timestamp: %s.%03ld", hms, millis);

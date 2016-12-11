@@ -19,7 +19,15 @@
 #include "HWComposer.h"
 
 #include <gui/BufferItem.h>
+<<<<<<< HEAD
 #include <gui/IProducerListener.h>
+=======
+<<<<<<< HEAD
+#include <gui/Surface.h>
+=======
+#include <gui/IProducerListener.h>
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -105,9 +113,21 @@ VirtualDisplaySurface::VirtualDisplaySurface(HWComposer& hwc, int32_t dispId,
     mConsumer->setConsumerName(ConsumerBase::mName);
     mConsumer->setConsumerUsageBits(GRALLOC_USAGE_HW_COMPOSER);
     mConsumer->setDefaultBufferSize(sinkWidth, sinkHeight);
+<<<<<<< HEAD
     sink->setAsyncMode(true);
     IGraphicBufferProducer::QueueBufferOutput output;
     mSource[SOURCE_SCRATCH]->connect(NULL, NATIVE_WINDOW_API_EGL, false, &output);
+=======
+<<<<<<< HEAD
+    mConsumer->setDefaultMaxBufferCount(NUM_FRAMEBUFFER_SURFACE_BUFFERS);
+
+    surface->allocateBuffers();
+=======
+    sink->setAsyncMode(true);
+    IGraphicBufferProducer::QueueBufferOutput output;
+    mSource[SOURCE_SCRATCH]->connect(NULL, NATIVE_WINDOW_API_EGL, false, &output);
+>>>>>>> 1c3a0422186745d6bfc69be60c12aab1651ed2e2
+>>>>>>> CyanogenMod-cm-14.1
 }
 
 VirtualDisplaySurface::~VirtualDisplaySurface() {
@@ -570,8 +590,8 @@ status_t VirtualDisplaySurface::connect(const sp<IProducerListener>& listener,
     return result;
 }
 
-status_t VirtualDisplaySurface::disconnect(int api) {
-    return mSource[SOURCE_SINK]->disconnect(api);
+status_t VirtualDisplaySurface::disconnect(int api, DisconnectMode mode) {
+    return mSource[SOURCE_SINK]->disconnect(api, mode);
 }
 
 status_t VirtualDisplaySurface::setSidebandStream(const sp<NativeHandle>& /*stream*/) {
